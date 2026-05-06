@@ -637,7 +637,7 @@ class WheelBot(commands.Bot):
             return
         log.info("Running daily snapshot")
         try:
-            # Performance update
+            # Performance update (DB-derived; useful trend stats over time)
             if hasattr(self.performance_tracker, "compute_daily"):
                 perf = await discord.utils.maybe_coroutine(
                     self.performance_tracker.compute_daily,
@@ -647,13 +647,22 @@ class WheelBot(commands.Bot):
                     embed = performance_embed(perf_dict)
                     await self._channel.send(embed=embed)
 
-            # Portfolio snapshot
-            from data import database as db
-
-            positions = db.get_open_positions()
+            # Live snapshot from Alpaca — not the DB. The DB has a history of
+            # drifting (wipes, missed reconciliations, "Order pending" notes
+            # never cleared). Pulling from the broker every evening means the
+            # 17:00 post is ground truth, period.
             if self._channel:
-                embed = portfolio_embed(positions)
-                await self._channel.send(embed=embed)
+                import os
+
+                from engine.account_summary import build_summary
+
+                msg = build_summary(
+                    self.broker,
+                    api_key=os.getenv("ALPACA_API_KEY"),
+                    secret_key=os.getenv("ALPACA_SECRET_KEY"),
+                    label="Daily snapshot",
+                )
+                await self._channel.send(msg)
 
             log.info("Daily snapshot complete")
         except Exception as exc:
@@ -804,13 +813,27 @@ class WheelBot(commands.Bot):
 # ── Slash commands (module-level, added in setup_hook) ────────────────────
 
 
-@discord.app_commands.command(name="portfolio", description="Show all open positions")
+@discord.app_commands.command(name="portfolio", description="Show live account snapshot from Alpaca")
 async def _portfolio_cmd(interaction: discord.Interaction) -> None:
-    from data import database as db
+    """Pull live state from Alpaca (NOT the local DB — that has a history of
+    drifting out of sync with reality). Source of truth = the broker."""
+    import os
 
-    positions = db.get_open_positions()
-    embed = portfolio_embed(positions)
-    await interaction.response.send_message(embed=embed)
+    from engine.account_summary import build_summary
+
+    bot: WheelBot = interaction.client  # type: ignore[assignment]
+    await interaction.response.defer(thinking=True)
+    try:
+        msg = build_summary(
+            bot.broker,
+            api_key=os.getenv("ALPACA_API_KEY"),
+            secret_key=os.getenv("ALPACA_SECRET_KEY"),
+            label="Portfolio",
+        )
+        await interaction.followup.send(msg)
+    except Exception as exc:
+        log.error("/portfolio failed: %s", exc)
+        await interaction.followup.send(f"⚠️ Could not fetch account: {exc}")
 
 
 @discord.app_commands.command(name="performance", description="Show performance stats")
