@@ -569,7 +569,9 @@ class AlpacaBroker:
         strike_int = round(strike * 1000)
         strike_str = f"{strike_int:08d}"
 
-        # Pad underlying to 6 chars
-        padded = underlying.ljust(6)
-
-        return f"{padded}{date_str}{type_char}{strike_str}"
+        # NO space-padding on the underlying. Strict OCC pads to 6 chars, but
+        # Alpaca's market data API rejects padded symbols (regex requires no
+        # whitespace). The trading API tolerates padding so this looked fine
+        # for orders, but every market-data refresh on a short-ticker option
+        # (F, T) would silently fail until you fed it the unpadded form.
+        return f"{underlying}{date_str}{type_char}{strike_str}"

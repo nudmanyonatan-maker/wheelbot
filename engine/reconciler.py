@@ -444,9 +444,13 @@ class PositionReconciler:
 
         type_char = "C" if option_type.lower() == "call" else "P"
         # Use round() instead of int() to prevent floating-point truncation
-        # Must match AlpacaBroker._build_option_symbol()
+        # Must match AlpacaBroker._build_option_symbol() — and Alpaca's
+        # canonical form has NO space-padding on the underlying ticker.
+        # (Padding here was the silent cause of assignment-detection always
+        # missing — broker_options held "F260515P00012000" while this returned
+        # "F     260515P00012000", so `key not in broker_options` was True
+        # for legitimately-open positions.)
         strike_int = round(strike * 1000)
         strike_str = f"{strike_int:08d}"
-        padded = symbol.ljust(6)
 
-        return f"{padded}{date_str}{type_char}{strike_str}"
+        return f"{symbol}{date_str}{type_char}{strike_str}"
