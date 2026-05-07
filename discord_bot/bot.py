@@ -794,7 +794,7 @@ class WheelBot(commands.Bot):
         from data.database import _connect
         with _connect() as conn:
             rows = conn.execute(
-                "SELECT e.*, s.symbol, s.strategy, s.side FROM executions e "
+                "SELECT e.*, s.symbol, s.strategy, s.action FROM executions e "
                 "LEFT JOIN signals s ON e.signal_id = s.id "
                 "WHERE e.fill_date IS NOT NULL "
                 "AND DATE(e.fill_date) = DATE(?)",
@@ -802,7 +802,7 @@ class WheelBot(commands.Bot):
             ).fetchall()
         return [
             {"symbol": r["symbol"] or "?", "strategy": r["strategy"] or "?",
-             "side": r["side"] or "sell", "price": r["fill_price"] or 0,
+             "side": r["action"] or "sell", "price": r["fill_price"] or 0,
              "contracts": 1, "fill_date": str(r["fill_date"])}
             for r in rows
         ]
@@ -815,7 +815,7 @@ class WheelBot(commands.Bot):
         start = (today - timedelta(days=7)).isoformat()
         with _connect() as conn:
             rows = conn.execute(
-                "SELECT e.*, s.symbol, s.strategy, s.side FROM executions e "
+                "SELECT e.*, s.symbol, s.strategy, s.action FROM executions e "
                 "LEFT JOIN signals s ON e.signal_id = s.id "
                 "WHERE e.fill_date IS NOT NULL AND DATE(e.fill_date) >= DATE(?) "
                 "ORDER BY e.fill_date",
@@ -823,7 +823,7 @@ class WheelBot(commands.Bot):
             ).fetchall()
         return [
             {"symbol": r["symbol"] or "?", "strategy": r["strategy"] or "?",
-             "side": r["side"] or "sell", "price": r["fill_price"] or 0,
+             "side": r["action"] or "sell", "price": r["fill_price"] or 0,
              "contracts": 1, "fill_date": str(r["fill_date"])}
             for r in rows
         ]
