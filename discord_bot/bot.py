@@ -167,6 +167,25 @@ class WheelBot(commands.Bot):
         except discord.HTTPException as exc:
             log.error("Failed to sync slash commands: %s", exc)
 
+        # Startup reconciliation: Railway has no persistent volume, so every
+        # deploy ships an empty wheelbot.db. Without this, exit_engine sees
+        # zero positions to monitor and the scanner could re-open positions
+        # Alpaca already has. The 09:31 scheduled reconciler is too late —
+        # it leaves a window from container start until tomorrow morning
+        # where the bot is operating blind. Backfill from Alpaca on every
+        # boot so the bot's state is always consistent with the broker.
+        try:
+            if hasattr(self.reconciler, "reconcile"):
+                changes = await discord.utils.maybe_coroutine(self.reconciler.reconcile)
+                if changes:
+                    log.info("Startup reconcile: %d change(s)", len(changes))
+                    for c in changes:
+                        log.info("  - %s", c)
+                else:
+                    log.info("Startup reconcile: DB matches broker")
+        except Exception as exc:
+            log.error("Startup reconcile failed (non-fatal): %s", exc)
+
         # NEW-I4: Recover pending signals from previous session
         pending_signals = self.signal_queue.get_pending()
         if pending_signals:
