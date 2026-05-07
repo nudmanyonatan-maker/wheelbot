@@ -537,11 +537,16 @@ class WheelBot(commands.Bot):
                         )
                         self.signal_queue.mark_auto_executed(sig_id)
 
-                        # Notify on Discord (no buttons — just a confirmation)
+                        # Notify via webhook (NOT self._channel — the bot
+                        # connection's channel cache has been silently no-op'ing
+                        # status posts. Webhook is the same path the heartbeat
+                        # alarm uses; we know it works).
                         embed = signal_embed(sig)
                         embed.set_footer(text="✅ AUTO-EXECUTED | WheelBot Autonomous Mode")
                         embed.color = discord.Colour.green()
-                        if self._channel:
+                        if self.webhook_sender:
+                            self.webhook_sender.send_embed(embed.to_dict())
+                        elif self._channel:
                             await self._channel.send(embed=embed)
 
                         executed.append(sig.symbol)
@@ -586,8 +591,12 @@ class WheelBot(commands.Bot):
         skipped_capital: list[str],
         error: str | None,
     ) -> None:
-        """Post a short morning-scan summary to Discord (always, even on no-op)."""
-        if not self._channel:
+        """Post a short morning-scan summary to Discord (always, even on no-op).
+
+        Uses the webhook because self._channel.send() has been silently
+        dropping messages (likely missing GUILDS intent → empty channel cache).
+        """
+        if not self.webhook_sender:
             return
         try:
             from utils.timing import now_et
@@ -627,7 +636,9 @@ class WheelBot(commands.Bot):
             if skipped_capital:
                 lines.append(f"Skipped (capital cap): {', '.join(skipped_capital)}")
 
-            await self._channel.send("\n".join(lines))
+            ok = self.webhook_sender.send("\n".join(lines))
+            if not ok:
+                log.warning("Scan summary webhook returned non-2xx")
         except Exception as exc:
             log.error("Failed to post scan summary: %s", exc)
 
@@ -666,11 +677,12 @@ class WheelBot(commands.Bot):
                     embed = performance_embed(perf_dict)
                     await self._channel.send(embed=embed)
 
-            # Live snapshot from Alpaca — not the DB. The DB has a history of
-            # drifting (wipes, missed reconciliations, "Order pending" notes
-            # never cleared). Pulling from the broker every evening means the
-            # 17:00 post is ground truth, period.
-            if self._channel:
+            # Live snapshot from Alpaca — sent via WEBHOOK, not self._channel.
+            # The bot's channel cache has been silently dropping these posts;
+            # the webhook is the same path the heartbeat alarm uses (proven
+            # working). The DB is also untrusted — pulling from the broker
+            # every evening means the 17:00 post is ground truth, period.
+            if self.webhook_sender:
                 import os
 
                 from engine.account_summary import build_summary
@@ -681,7 +693,9 @@ class WheelBot(commands.Bot):
                     secret_key=os.getenv("ALPACA_SECRET_KEY"),
                     label="Daily snapshot",
                 )
-                await self._channel.send(msg)
+                ok = self.webhook_sender.send(msg)
+                if not ok:
+                    log.warning("Daily snapshot webhook returned non-2xx")
 
             log.info("Daily snapshot complete")
         except Exception as exc:
