@@ -14,8 +14,11 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 from typing import Any
+from zoneinfo import ZoneInfo
 
 import requests
+
+ET = ZoneInfo("America/New_York")
 
 
 def build_summary(
@@ -38,7 +41,10 @@ def build_summary(
     """
     acct = broker.trading.get_account()
     equity = float(acct.equity)
-    last_equity = float(acct.last_equity) or equity
+    # Explicit None check, NOT `or equity` — last_equity could legitimately be 0.0
+    # (account just funded today, or a previously zero-equity day) and we don't
+    # want to silently fall back, which would make today's delta look like $0.
+    last_equity = float(acct.last_equity) if acct.last_equity is not None else equity
     cash = float(acct.cash)
     bp = float(acct.buying_power)
     delta = equity - last_equity
@@ -47,8 +53,12 @@ def build_summary(
     delta_sign = "+" if delta >= 0 else ""
     pct_sign = "+" if pct >= 0 else ""
 
+    # Always anchor the displayed time to Eastern, regardless of container TZ.
+    # Railway sets TZ=America/New_York via Dockerfile so this is currently a
+    # no-op, but a deploy that forgets that env var would silently start
+    # mis-labeling timestamps. Anchoring here makes the label match the data.
     lines = [
-        f"📊 **{label} @ {datetime.now().strftime('%H:%M ET')}**",
+        f"📊 **{label} @ {datetime.now(ET).strftime('%H:%M ET')}**",
         f"Equity: ${equity:,.2f} | Today: {delta_sign}${delta:,.2f} ({pct_sign}{pct:.2f}%) | BP: ${bp:,.2f} | Cash: ${cash:,.2f}",
     ]
 
@@ -76,7 +86,13 @@ def build_summary(
         sign = "+" if total_upl >= 0 else ""
         lines.append(f"  Total unrealized: {sign}${total_upl:,.2f}")
 
-    # Today's activity (closes, assignments, fees) — only if creds provided
+    # Today's activity (closes, assignments, fees) — only if creds provided.
+    # Assumption: WheelBot is a short-options-only strategy (sell-to-open CSPs
+    # and CCs, buy-to-close at profit target or stop). Under that strategy,
+    # buy-side fills are always closes and sell-side fills are always opens.
+    # If this assumption ever changes (e.g. PMCC LEAPS = long calls, opened
+    # via buy), this classification needs the activity record's position_effect
+    # field, not just side. See alpaca-py docs for non-FILL activity types.
     if include_today_activity and api_key and secret_key:
         today_acts = _fetch_today_activities(api_key, secret_key)
         closes = [a for a in today_acts if a.get("activity_type") == "FILL" and a.get("side") == "buy"]

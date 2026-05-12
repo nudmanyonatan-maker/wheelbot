@@ -178,7 +178,10 @@ class PositionReconciler:
         """
         from datetime import datetime as _dt
 
-        if len(symbol) < 15:
+        # Minimum OCC length is 16: underlying (≥1 char) + 6 date + 1 type + 8 strike.
+        # A 15-char symbol would leave underlying = "" after symbol[:-15], silently
+        # returning an unusable parse result.
+        if len(symbol) < 16:
             return None
         # Last 8 chars = strike, char before = C/P, 6 before that = YYMMDD,
         # everything before = underlying (right-stripped).

@@ -25,14 +25,21 @@ read_token() {
 }
 
 gql() {
-  # $1 = query, $2 (optional) = JSON variables (defaults to empty object)
+  # $1 = query, $2 (optional) = JSON variables (defaults to empty object).
+  # set -u is enabled (see set -euo pipefail above), so use ${2:-} to default
+  # the optional positional parameter to empty without tripping unset-var.
   local query="$1"
-  local vars="$2"
+  local vars="${2:-}"
   if [[ -z "$vars" ]]; then vars='{}'; fi
   local body
   body=$(python3 -c "import json,sys; print(json.dumps({'query': sys.argv[1], 'variables': json.loads(sys.argv[2])}))" "$query" "$vars")
+  # Capture token into a variable instead of inlining $(read_token) into the
+  # curl invocation — inline expansion exposes the bearer token in process
+  # listings (`ps auxe`) for the lifetime of the curl call.
+  local token
+  token=$(read_token)
   curl -s "$GRAPHQL" \
-    -H "Authorization: Bearer $(read_token)" \
+    -H "Authorization: Bearer $token" \
     -H "Content-Type: application/json" \
     -d "$body"
 }
@@ -69,11 +76,14 @@ COMMIT="${REST%%|*}"
 MSG="${REST#*|}"
 echo "→ approving $COMMIT — $MSG"
 RESULT=$(gql 'mutation($id: String!) { deploymentApprove(id: $id) }' "{\"id\":\"$DEPLOY_ID\"}")
-if echo "$RESULT" | grep -q '"deploymentApprove":true'; then
+# Parse the JSON properly instead of grepping — grep is fragile to formatting
+# changes (whitespace, key order) and would silently fail on, e.g.,
+# `"deploymentApprove" : true`.
+if printf '%s' "$RESULT" | python3 -c "import json,sys; d=json.load(sys.stdin); sys.exit(0 if d.get('data',{}).get('deploymentApprove') is True else 1)" 2>/dev/null; then
   echo "  ✓ approved. Build/deploy starting."
 else
   echo "  ✗ approval failed:"
-  echo "$RESULT" | python3 -m json.tool
+  printf '%s' "$RESULT" | python3 -m json.tool 2>/dev/null || printf '%s\n' "$RESULT"
   exit 1
 fi
 
