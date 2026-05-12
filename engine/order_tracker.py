@@ -28,6 +28,12 @@ class OrderTracker:
         self.broker = broker
         self.webhook = webhook
         self.stale_hours: float = get("scheduling.stale_order_hours", 2.0)
+        # Dedup: remember when we last alerted on each pending exec so we
+        # don't spam Discord every 5 min for the same stale order. Even when
+        # the underlying tracker bug is fixed (enum stringification), this is
+        # the right floor — repeated identical alerts add zero new information.
+        self._stale_alert_cooldown_hours: float = 6.0
+        self._stale_last_alerted: dict[int, datetime] = {}
 
     # ── Public API ────────────────────────────────────────────────────────
 
@@ -310,6 +316,13 @@ class OrderTracker:
                 "Order %s has been pending for %.1fh (threshold: %.1fh) — exec #%s",
                 exe.robinhood_order_id, age_hours, self.stale_hours, exe.id,
             )
+            # Dedup: only send Discord alert if we haven't already in the
+            # cooldown window. Tracker bug or not, identical "stale order"
+            # messages every 5 minutes is alert fatigue, not signal.
+            last = self._stale_last_alerted.get(exe.id or 0)
+            if last is not None and (now - last).total_seconds() / 3600 < self._stale_alert_cooldown_hours:
+                return
+            self._stale_last_alerted[exe.id or 0] = now
             self._send_alert(
                 f"Stale order ({age_hours:.1f}h): {order.symbol} "
                 f"{order.option_type} ${order.strike} {order.expiration_date} "

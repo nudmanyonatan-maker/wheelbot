@@ -256,7 +256,7 @@ class AlpacaBroker:
                 expiration_date="",
                 quantity=int(float(order.qty)),
                 limit_price=float(order.limit_price) if order.limit_price else 0.0,
-                status=str(order.status),
+                status=order.status.value if hasattr(order.status, "value") else str(order.status),
                 fill_price=float(order.filled_avg_price) if order.filled_avg_price else None,
                 fill_date=order.filled_at,
             )
@@ -345,7 +345,7 @@ class AlpacaBroker:
                 expiration_date=expiration,
                 quantity=quantity,
                 limit_price=credit,
-                status=str(order.status),
+                status=order.status.value if hasattr(order.status, "value") else str(order.status),
                 secondary_order_id=long_leg_order_id,
             )
 
@@ -420,7 +420,7 @@ class AlpacaBroker:
                 expiration_date=expiration,
                 quantity=quantity,
                 limit_price=debit,
-                status=str(order.status),
+                status=order.status.value if hasattr(order.status, "value") else str(order.status),
             )
 
         except Exception as e:
@@ -477,7 +477,7 @@ class AlpacaBroker:
                 expiration_date=expiration,
                 quantity=quantity,
                 limit_price=0.0,
-                status=str(order.status),
+                status=order.status.value if hasattr(order.status, "value") else str(order.status),
             )
         except Exception as e:
             log.error("Market order failed (buy_to_close %s): %s", option_symbol, e)
@@ -529,7 +529,7 @@ class AlpacaBroker:
                 expiration_date="",
                 quantity=quantity,
                 limit_price=price,
-                status=str(order.status),
+                status=order.status.value if hasattr(order.status, "value") else str(order.status),
             )
         except Exception as e:
             log.error("Order failed (%s %s): %s", action_desc, option_symbol, e)
