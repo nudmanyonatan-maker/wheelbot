@@ -55,8 +55,19 @@ echo "→ checking for gated deploys..."
 PENDING=$(gql 'query($pid: String!) { deployments(first:5, input:{projectId:$pid, status:{in:[NEEDS_APPROVAL]}}) { edges { node { id meta } } } }' "{\"pid\":\"$PROJECT_ID\"}" \
   | python3 -c "
 import sys, json
-d = json.load(sys.stdin)
-edges = d.get('data', {}).get('deployments', {}).get('edges', [])
+raw = sys.stdin.read()
+try:
+    d = json.loads(raw)
+except json.JSONDecodeError:
+    sys.stderr.write(f'  ✗ Railway returned non-JSON response: {raw[:200]}\n')
+    sys.exit(2)
+# GraphQL errors come back as {errors:[...], data:null} — never assume data is dict.
+if d.get('errors') or d.get('data') is None:
+    err = (d.get('errors') or [{}])[0].get('message', 'unknown')
+    sys.stderr.write(f'  ✗ Railway API error: {err}\n')
+    sys.stderr.write('  -> run: railway login   (refresh the access token, then retry)\n')
+    sys.exit(2)
+edges = ((d.get('data') or {}).get('deployments') or {}).get('edges') or []
 if not edges:
     print('')
 else:
@@ -64,6 +75,9 @@ else:
     meta = n.get('meta') or {}
     print(f\"{n['id']}|{(meta.get('commitHash') or '?')[:8]}|{(meta.get('commitMessage') or '').splitlines()[0][:60]}\")
 ")
+# Note: with `set -euo pipefail` at the top, an exit-2 inside the python
+# heredoc above already aborts the script after its stderr is flushed,
+# so a separate exit-code check here would be unreachable.
 
 if [[ -z "$PENDING" ]]; then
   echo "  no gated deploys — either nothing changed, or auto-deploy is on."
