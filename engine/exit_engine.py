@@ -50,6 +50,17 @@ class ExitEngine:
         self.wheel_stop_multiplier: float = get("wheel.stop_loss_multiplier", 2.0)
         self.wheel_roll_dte: int = get("wheel.roll_dte_threshold", 7)
 
+        # Dedup state: per-position cooldown so we don't emit the same close
+        # signal every 5-min exit cycle. Without this, a profitable position
+        # generates a fresh BUY_TO_CLOSE signal every check_all_positions()
+        # call until it actually closes — and during the window between
+        # "limit order placed" and "limit order fills", that means every
+        # cycle re-fires Discord notifications and the executor's duplicate
+        # detection rejects the actual order. End result: 20+ identical
+        # AUTO-EXECUTED embeds for one underlying position.
+        self._last_close_signal_at: dict[tuple, datetime] = {}
+        self._close_signal_cooldown_minutes: int = 30
+
     # ── Public API ────────────────────────────────────────────────────────
 
     def check_all_positions(self) -> list[Signal]:
@@ -239,9 +250,27 @@ class ExitEngine:
         if pos.current_price is None or pos.entry_price <= 0:
             return signals
 
+        # Dedup key per *contract*, not per DB-position id (id resets on
+        # every deploy when the SQLite volume is rebuilt; the OCC-equivalent
+        # tuple survives). If we emitted a close for this exact contract
+        # within the cooldown, skip — the order is either already in flight
+        # or the cooldown will expire and we'll re-evaluate then.
+        dedup_key = (pos.symbol, pos.option_type, pos.strike, pos.expiration_date)
+        last_emitted = self._last_close_signal_at.get(dedup_key)
+        now = now_et()
+        if last_emitted is not None:
+            minutes_since = (now - last_emitted).total_seconds() / 60
+            if minutes_since < self._close_signal_cooldown_minutes:
+                log.debug(
+                    "Skipping exit-signal emit for %s — cooldown %.1f/%d min",
+                    dedup_key, minutes_since, self._close_signal_cooldown_minutes,
+                )
+                return signals
+
         # 1. Profit target — 50% of credit captured (auto-execute)
         target_price = pos.entry_price * (1 - self.wheel_profit_target)
         if pos.current_price <= target_price:
+            self._last_close_signal_at[dedup_key] = now
             signals.append(Signal(
                 symbol=pos.symbol,
                 strategy=pos.strategy,
@@ -263,6 +292,7 @@ class ExitEngine:
         # 2. Stop loss — current price >= 2x entry credit
         stop_price = pos.entry_price * self.wheel_stop_multiplier
         if pos.current_price >= stop_price:
+            self._last_close_signal_at[dedup_key] = now
             signals.append(Signal(
                 symbol=pos.symbol,
                 strategy=pos.strategy,
@@ -283,6 +313,7 @@ class ExitEngine:
 
         # 3. DTE roll — fewer than 7 days remaining
         if pos.dte_remaining is not None and pos.dte_remaining < self.wheel_roll_dte:
+            self._last_close_signal_at[dedup_key] = now
             signals.append(Signal(
                 symbol=pos.symbol,
                 strategy=pos.strategy,

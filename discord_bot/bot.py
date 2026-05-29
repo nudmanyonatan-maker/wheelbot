@@ -262,6 +262,51 @@ class WheelBot(commands.Bot):
         except discord.HTTPException as exc:
             log.error("Failed to send fill notification: %s", exc)
 
+    async def _execute_and_notify(self, sig) -> None:
+        """Execute an AUTO_EXECUTED signal and notify Discord *only if the order
+        actually got placed*.
+
+        Replaces the old "notify without executing" pattern in both exit-monitor
+        loops, which lied with green ✅ AUTO-EXECUTED embeds while the position
+        never closed. Now:
+          1. Call executor.execute_signal — actually place the order at Alpaca
+          2. Only post the embed if status is FILLED / PENDING (real outcomes)
+          3. Suppress notification if executor rejected (duplicate detection,
+             insufficient buying power, circuit breaker) — those used to spam
+             Discord with false "AUTO-EXECUTED" claims for the same position.
+        Posts via webhook (proven delivery path) instead of self._channel.send.
+        """
+        try:
+            sig_id = self.signal_queue.create(sig)
+            sig.id = sig_id
+            execution = await discord.utils.maybe_coroutine(
+                self.executor.execute_signal, sig,
+            )
+        except Exception as exc:
+            log.error("Auto-execute failed for %s %s: %s", sig.symbol, sig.action, exc)
+            return
+
+        if not execution:
+            return
+
+        status = (execution.status or "").lower()
+        if status == "rejected":
+            log.info(
+                "Suppressing %s notification for %s — executor rejected: %s",
+                sig.action, sig.symbol, execution.error_message or "(no reason)",
+            )
+            return
+
+        self.signal_queue.mark_auto_executed(sig_id)
+
+        embed = signal_embed(sig)
+        embed.set_footer(text="✅ AUTO-EXECUTED | WheelBot Autonomous Mode")
+        embed.color = discord.Colour.green()
+        if self.webhook_sender:
+            self.webhook_sender.send_embed(embed.to_dict())
+        elif self._channel:
+            await self._channel.send(embed=embed)
+
     async def send_alert(self, title: str, message: str, level: str = "warning") -> None:
         """Send a generic alert embed to the channel."""
         if not self._channel:
@@ -369,16 +414,8 @@ class WheelBot(commands.Bot):
 
             if signals:
                 for sig in signals:
-                    if sig.status == SignalStatus.AUTO_EXECUTED.value:
-                        # Already executed — send notification only, no buttons
-                        embed = signal_embed(sig)
-                        embed.set_footer(text="AUTO-EXECUTED")
-                        embed.color = discord.Colour.green()
-                        if self._channel:
-                            await self._channel.send(embed=embed)
-                    else:
-                        await self.send_signal(sig)
-                log.info("Exit monitor found %d exit signals", len(signals))
+                    await self._execute_and_notify(sig)
+                log.info("Exit monitor processed %d exit signal(s)", len(signals))
         except Exception as exc:
             log.error("Exit monitor loop error: %s", exc)
 
@@ -414,16 +451,8 @@ class WheelBot(commands.Bot):
 
             if signals:
                 for sig in signals:
-                    if sig.status == SignalStatus.AUTO_EXECUTED.value:
-                        # Already executed — send notification only, no buttons
-                        embed = signal_embed(sig)
-                        embed.set_footer(text="AUTO-EXECUTED")
-                        embed.color = discord.Colour.green()
-                        if self._channel:
-                            await self._channel.send(embed=embed)
-                    else:
-                        await self.send_signal(sig)
-                log.info("Fast exit monitor: %d exit signals", len(signals))
+                    await self._execute_and_notify(sig)
+                log.info("Fast exit monitor processed %d exit signal(s)", len(signals))
         except Exception as exc:
             log.error("Fast exit monitor loop error: %s", exc)
 
