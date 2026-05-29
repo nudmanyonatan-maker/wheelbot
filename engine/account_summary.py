@@ -62,6 +62,20 @@ def build_summary(
         f"Equity: ${equity:,.2f} | Today: {delta_sign}${delta:,.2f} ({pct_sign}{pct:.2f}%) | BP: ${bp:,.2f} | Cash: ${cash:,.2f}",
     ]
 
+    # All-time P&L since bot launch — the single most important number for
+    # "is this thing working?" Pulls from Alpaca's portfolio history endpoint
+    # (persistent across container restarts; the bot's local DB resets every
+    # deploy so any locally-computed performance stats are unreliable).
+    if api_key and secret_key:
+        launch_equity, total_pl, total_pct = _launch_to_date_pnl(api_key, secret_key)
+        if launch_equity is not None:
+            pl_sign = "+" if total_pl >= 0 else ""
+            pct_sign = "+" if total_pct >= 0 else ""
+            lines.append(
+                f"Since launch (04-23): {pl_sign}${total_pl:,.2f} ({pct_sign}{total_pct:.2f}%) "
+                f"— launch ${launch_equity:,.2f} → now ${equity:,.2f}"
+            )
+
     # Open positions
     positions = broker.trading.get_all_positions()
     if not positions:
@@ -110,6 +124,53 @@ def build_summary(
 def _is_option(symbol: str) -> bool:
     """Heuristic: OCC option symbols are at least 15 chars and end with 8 digits."""
     return len(symbol) >= 15 and symbol[-8:].isdigit()
+
+
+LAUNCH_DATE = "2026-04-23"  # WheelBot's live-launch date per LIVE_LAUNCH.md
+# When you ever change this (significant capital change, strategy reset),
+# also update LIVE_LAUNCH.md so the docs stay consistent with the metric.
+
+
+def _launch_to_date_pnl(
+    api_key: str, secret_key: str,
+) -> tuple[float | None, float, float]:
+    """Return (launch_equity, total_pnl_$, total_pnl_%) from Alpaca's
+    portfolio history. (None, 0, 0) on any failure — caller should skip
+    the line rather than mis-report.
+
+    Why not compute from the DB? Because the SQLite wheelbot.db resets
+    every Railway deploy. Alpaca's portfolio history is persistent and is
+    the only source of truth for "how much have I made/lost since I started".
+    """
+    try:
+        from datetime import datetime as _dt
+        r = requests.get(
+            "https://api.alpaca.markets/v2/account/portfolio/history",
+            headers={"APCA-API-KEY-ID": api_key, "APCA-API-SECRET-KEY": secret_key},
+            params={"period": "1A", "timeframe": "1D"},  # 1A = 1 year, enough since launch
+            timeout=10,
+        )
+        if not r.ok:
+            return None, 0.0, 0.0
+        h = r.json() or {}
+        timestamps = h.get("timestamp") or []
+        equities = h.get("equity") or []
+        if not timestamps or not equities:
+            return None, 0.0, 0.0
+        launch_dt = _dt.fromisoformat(LAUNCH_DATE).date()
+        launch_eq = None
+        for t, e in zip(timestamps, equities):
+            if _dt.fromtimestamp(t, timezone.utc).date() >= launch_dt:
+                launch_eq = float(e)
+                break
+        if launch_eq is None or launch_eq <= 0:
+            return None, 0.0, 0.0
+        current_eq = float(equities[-1])
+        delta = current_eq - launch_eq
+        pct = delta / launch_eq * 100
+        return launch_eq, delta, pct
+    except Exception:
+        return None, 0.0, 0.0
 
 
 def _fetch_today_activities(api_key: str, secret_key: str) -> list[dict]:
