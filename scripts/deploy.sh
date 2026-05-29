@@ -21,6 +21,14 @@ ENV_ID="78a92d21-93f3-4ddc-afd0-05b10a330448"
 GRAPHQL="https://backboard.railway.com/graphql/v2"
 
 read_token() {
+  # Prefer a long-lived Personal/Project API token from $RAILWAY_TOKEN if set
+  # (created once at https://railway.com/account/tokens, never expires).
+  # Fall back to the rotating OAuth accessToken from ~/.railway/config.json
+  # (expires every ~11 days, requires `railway login` to refresh).
+  if [[ -n "${RAILWAY_TOKEN:-}" ]]; then
+    printf '%s' "$RAILWAY_TOKEN"
+    return
+  fi
   python3 -c "import json; print(json.load(open('$HOME/.railway/config.json'))['user']['accessToken'])"
 }
 
