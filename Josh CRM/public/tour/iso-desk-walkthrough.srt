@@ -1,0 +1,163 @@
+1
+00:00:00,600 --> 00:00:03,260
+Hey Josh. Here's how ISO Desk fits into
+
+2
+00:00:03,060 --> 00:00:03,660
+your day.
+
+3
+00:00:03,869 --> 00:00:05,469
+The first time you sign in,
+
+4
+00:00:05,429 --> 00:00:07,749
+click Import, and drop in your contacts,
+
+5
+00:00:07,549 --> 00:00:10,289
+or your list from SmartMCA.
+
+6
+00:00:10,607 --> 00:00:12,467
+Each company becomes a shop,
+
+7
+00:00:12,267 --> 00:00:14,487
+with its people. Click Import.
+
+8
+00:00:14,786 --> 00:00:16,286
+Then click Turn on,
+
+9
+00:00:16,346 --> 00:00:18,626
+so follow-ups pop up on your screen.
+
+10
+00:00:18,884 --> 00:00:21,344
+From then on, every morning starts on Today.
+
+11
+00:00:21,764 --> 00:00:23,324
+Your follow-ups are at the top,
+
+12
+00:00:23,504 --> 00:00:24,504
+late ones first.
+
+13
+00:00:24,742 --> 00:00:27,262
+Below that: deals waiting on paperwork,
+
+14
+00:00:27,622 --> 00:00:28,902
+and renewals that are ready.
+
+15
+00:00:29,080 --> 00:00:30,460
+When a follow-up is due,
+
+16
+00:00:30,600 --> 00:00:33,140
+it pops up, even with the desk closed.
+
+17
+00:00:33,336 --> 00:00:36,796
+Click Call, and Connect UC dials the shop.
+
+18
+00:00:36,975 --> 00:00:38,195
+When you hang up,
+
+19
+00:00:38,215 --> 00:00:40,195
+click Hung up, and pick how it went.
+
+20
+00:00:40,350 --> 00:00:42,550
+Jot a note, pick the next follow-up,
+
+21
+00:00:42,350 --> 00:00:44,890
+and save. The old one closes for you.
+
+22
+00:00:45,007 --> 00:00:46,347
+To add a follow-up anytime,
+
+23
+00:00:46,627 --> 00:00:48,207
+click Follow-up, type who,
+
+24
+00:00:48,427 --> 00:00:49,207
+and pick when.
+
+25
+00:00:49,659 --> 00:00:50,759
+To text a shop,
+
+26
+00:00:50,859 --> 00:00:52,859
+click Text, and pick a template.
+
+27
+00:00:53,119 --> 00:00:54,419
+It fills in what's missing.
+
+28
+00:00:54,715 --> 00:00:57,955
+Click Copy text, then paste it into Connect
+
+29
+00:00:57,755 --> 00:00:59,055
+UC and send.
+
+30
+00:00:59,292 --> 00:01:00,992
+When a shop sends you a deal,
+
+31
+00:01:01,312 --> 00:01:03,612
+go to Deals, and click Log a submission.
+
+32
+00:01:03,871 --> 00:01:05,071
+Type the business name.
+
+33
+00:01:05,331 --> 00:01:06,851
+If another shop sent it first,
+
+34
+00:01:07,171 --> 00:01:08,031
+it tells you.
+
+35
+00:01:08,128 --> 00:01:09,528
+Deals move left to right.
+
+36
+00:01:09,748 --> 00:01:11,468
+Drag a card when it moves forward.
+
+37
+00:01:11,768 --> 00:01:13,708
+If anything's missing, it tells you.
+
+38
+00:01:14,141 --> 00:01:16,201
+Click any deal to tick off paperwork,
+
+39
+00:01:16,421 --> 00:01:18,161
+record offers, and mark it funded.
+
+40
+00:01:19,420 --> 00:01:21,800
+That's it. Start every day on Today,
+
+41
+00:01:21,940 --> 00:01:23,640
+and the desk keeps track of the rest.

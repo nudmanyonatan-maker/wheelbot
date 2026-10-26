@@ -1,0 +1,17 @@
+{
+  "name": "broker-desk",
+  "private": true,
+  "description": "Broker Desk: a CRM for Canadian MCA brokers, with calling, a multi-line dialer, texting, email sequences and dashboards. Cloudflare Pages + D1 + R2.",
+  "scripts": {
+    "dev": "wrangler pages dev --port 8810",
+    "db:local": "wrangler d1 migrations apply broker-desk --local",
+    "seed": "node scripts/seed-demo.mjs",
+    "test": "node scripts/test-twilio.mjs && node scripts/test-api.mjs && node scripts/smoke.mjs",
+    "deploy": "node scripts/seed-demo.mjs --export public/demo-data && wrangler d1 migrations apply broker-desk --remote --env production && wrangler pages deploy --project-name broker-desk --branch main",
+    "demo:export": "node scripts/seed-demo.mjs --export public/demo-data"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.56.1",
+    "wrangler": "^4.151.0"
+  }
+}

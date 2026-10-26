@@ -1,0 +1,31 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  // Broker Desk: a CRM for Canadian MCA brokers. The top level is local development (npm run dev);
+  // env.production is the live site. Bindings and vars are not inherited, so each is listed per env.
+  "name": "broker-desk",
+  "pages_build_output_dir": "./public",
+  "compatibility_date": "2026-10-01",
+  // DEMO_GUEST: the demo workspace that gets a one-click "Open the demo" login. Only a workspace
+  // flagged demo can be opened this way. Remove it to turn guest sign-in off.
+  // DEMO_RESETS_PER_DAY caps the in-app "Reload data" button (see functions/api/demo/reset.js).
+  "vars": { "DEMO_GUEST": "crown-demo", "DEMO_RESETS_PER_DAY": "1000" },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "broker-desk", "database_id": "00000000-0000-4000-8000-000000000001", "migrations_dir": "db/migrations" }
+  ],
+  "r2_buckets": [
+    { "binding": "FILES", "bucket_name": "broker-desk-files" }
+  ],
+  "env": {
+    "production": {
+      "vars": { "DEMO_GUEST": "crown-demo", "DEMO_RESETS_PER_DAY": "2" },
+      "d1_databases": [
+        { "binding": "DB", "database_name": "broker-desk", "database_id": "e1cd9630-2689-4f25-bdff-9e02477d0b5b", "migrations_dir": "db/migrations" }
+      ],
+      // Uploaded files go to KV until R2 is on for this Cloudflare account. Once it is, create bucket
+      // broker-desk-files and add it here as { "binding": "FILES", ... }; new uploads then go to R2.
+      "kv_namespaces": [
+        { "binding": "FILES_KV", "id": "1dceec87bb7a4e479588ffca2bb6bed5" }
+      ]
+    }
+  }
+}

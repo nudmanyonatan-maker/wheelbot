@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ISO Desk guide</title>
+  <meta name="description" content="How to use ISO Desk, start to finish.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%232a43c4'/%3E%3Cpath d='M7 7.5h10M7 12h10M7 16.5h6' stroke='%23fff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .tour { max-width: 980px; margin: 0 auto; padding: 32px 20px 72px; }
+    .tour-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
+    .tour-top .brand { font-size: 17px; }
+    .tour h1 { font-size: 30px; margin: 0 0 6px; line-height: 1.2; }
+    .tour .lede { margin: 0 0 20px; color: var(--ink-2); font-size: 16px; max-width: 64ch; }
+    .tour video { width: 100%; border-radius: var(--r3); border: 1px solid var(--line); background: #fff; box-shadow: var(--shadow-lift); display: block; }
+    .tour h2 { font-size: 21px; margin: 44px 0 6px; }
+    .tour h2 + p { margin: 0 0 14px; color: var(--ink-2); max-width: 70ch; }
+    .start { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+    .start div { background: #fff; border: 1px solid var(--line); border-radius: var(--r2); padding: 14px 14px 16px; }
+    .start b { display: block; margin-bottom: 4px; }
+    .start span { color: var(--ink-2); font-size: 13.5px; }
+    .start .n { width: 24px; height: 24px; border-radius: 50%; background: var(--accent-soft); color: var(--accent-ink); font-weight: 700; font-size: 12.5px; display: grid; place-items: center; margin-bottom: 8px; }
+    .az { display: flex; flex-direction: column; gap: 10px; }
+    .az details { background: #fff; border: 1px solid var(--line); border-radius: var(--r2); }
+    .az summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 14px 16px; }
+    .az summary::-webkit-details-marker { display: none; }
+    .az summary .n { width: 28px; height: 28px; border-radius: 50%; background: var(--accent-soft); color: var(--accent-ink); font-weight: 700; font-size: 13px; display: grid; place-items: center; }
+    .az summary b { font-size: 15.5px; }
+    .az summary span { color: var(--ink-2); font-size: 13.5px; display: block; }
+    .az summary::after { content: "Show"; color: var(--accent-ink); font-size: 13px; font-weight: 600; }
+    .az details[open] summary::after { content: "Hide"; }
+    .az .body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 18px; padding: 0 16px 16px 62px; }
+    .az .body h3 { font-size: 13px; margin: 0 0 6px; color: var(--muted); font-weight: 600; }
+    .az .body p, .az .body li { color: var(--ink); font-size: 14px; }
+    .az .body p { margin: 0; }
+    .az .body ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 5px; }
+    .gloss2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .gloss2 div { background: #fff; border: 1px solid var(--line); border-radius: var(--r2); padding: 12px 14px; }
+    .gloss2 b { display: block; margin-bottom: 2px; }
+    .gloss2 span { color: var(--ink-2); font-size: 13.5px; }
+    .next-list { background: var(--warn-soft); border: 1px solid #efd9ac; color: #5f430d; border-radius: var(--r2); padding: 14px 16px; }
+    .next-list ul { margin: 6px 0 0; padding-left: 18px; }
+    .next-list li { margin: 4px 0; }
+    .tour .cta { margin-top: 28px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .tour .btn { height: 40px; padding: 0 16px; font-size: 15px; text-decoration: none; }
+    @media (max-width: 760px) {
+      .start, .gloss2 { grid-template-columns: minmax(0, 1fr); }
+      .az .body { grid-template-columns: minmax(0, 1fr); padding-left: 16px; }
+      .tour h1 { font-size: 25px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="tour">
+    <div class="tour-top">
+      <div class="brand"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#2a43c4"/><path d="M7 7.5h10M7 12h10M7 16.5h6" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg><span>ISO Desk</span></div>
+      <a class="btn primary" href="/">Open ISO Desk</a>
+    </div>
+    <h1>ISO Desk, start to finish</h1>
+    <p class="lede">Built for Josh. Your shops, deals, follow-ups, calls and texts in one place. Watch the walkthrough with sound on, then use the guide below whenever you need it.</p>
+    <video src="iso-desk-walkthrough.mp4" poster="poster.jpg" controls playsinline preload="metadata"></video>
+
+    <h2>Your first ten minutes</h2>
+    <p>Do these once. After that, Today is where you start every day.</p>
+    <div class="start">
+      <div><span class="n">1</span><b>Pick your password</b><span>Open the link Yonatan texted you. Use the same email and password on your phone and computer.</span></div>
+      <div><span class="n">2</span><b>Bookmark it</b><span>On your computer, bookmark the page so it is one click away. On your iPhone, open it in Safari, tap Share, then Add to Home Screen.</span></div>
+      <div><span class="n">3</span><b>Turn on alerts</b><span>On Today, click Turn on, then Allow. You get a test alert right away. Do the same on your phone if you want alerts there too.</span></div>
+      <div><span class="n">4</span><b>Bring your contacts</b><span>iPhone: Contacts, Lists, hold All Contacts, Export. Or export your ISO list from SmartMCA. Then click Import on Today.</span></div>
+    </div>
+
+    <h2>The whole job, A to Z</h2>
+    <p>Each step is what happens in the business, and what you do in ISO Desk when it does.</p>
+    <div class="az">
+      <details open><summary><span class="n">1</span><div><b>A shop starts working with you</b><span>Add it once, with its people.</span></div></summary>
+        <div class="body"><div><h3>What happens</h3><p>A broker shop (an ISO) signs our ISO agreement and starts sending merchants.</p></div>
+        <div><h3>In ISO Desk</h3><ul><li>Shops, Add shop. It warns you if the shop is already here under another spelling.</li><li>Add the owner, the reps who send deals and whoever handles files. Each can have two numbers.</li><li>Mark the ISO agreement signed and the W-9 received. Commission cannot be paid without them.</li><li>Write a note on how they work: what they send, who to call, how they like to be reached.</li><li>Duplicate shops show a Merge button. Nothing is lost when you merge.</li></ul></div></div></details>
+      <details><summary><span class="n">2</span><div><b>Keep the shop sending deals</b><span>Follow-ups, calls and texts.</span></div></summary>
+        <div class="body"><div><h3>What happens</h3><p>Shops send more to the funders who stay in touch. A shop that goes quiet is usually sending to someone else.</p></div>
+        <div><h3>In ISO Desk</h3><ul><li>Today lists shops that have gone quiet (no deal in 30 days, you can change it in Settings).</li><li>Follow-up, top right, works from anywhere: who, when, what for. It can repeat every week.</li><li>When one comes due it pops up on your screen, even with the desk closed, with Call, Text, Done and Later.</li><li>Call opens Connect UC with the number ready. When you hang up, click Hung up, write what happened and pick the next follow-up in the same box. Saving it closes the follow-up you called about.</li><li>Text uses your templates, which fill in the name, merchant and what is missing. Click Copy text, paste it into Connect UC and send. The desk keeps a copy.</li><li>Each shop shows its last 90 days: how many deals sent, approved and funded, and the most common decline reason.</li></ul></div></div></details>
+      <details><summary><span class="n">3</span><div><b>A deal comes in</b><span>Log it, and check who sent it first.</span></div></summary>
+        <div class="body"><div><h3>What happens</h3><p>The shop sends a merchant's application and the last three months of bank statements.</p></div>
+        <div><h3>In ISO Desk</h3><ul><li>Deals, Log a submission. Pick the shop and who sent it, then the merchant's details.</li><li>If another shop already sent that merchant, it tells you who got there first and when.</li><li>Tick what came with it. Anything missing shows on the card and on Today.</li><li>Text the shop for it shows the exact documents still missing.</li></ul></div></div></details>
+      <details><summary><span class="n">4</span><div><b>Underwriting decides</b><span>Approve with offers, or decline with a reason.</span></div></summary>
+        <div class="body"><div><h3>What happens</h3><p>Underwriting approves with one or more offers, or declines.</p></div>
+        <div><h3>In ISO Desk</h3><ul><li>Send to underwriting once the file is complete. It will not move until the paperwork is in.</li><li>Record an approval: amount, buy rate, term, payments, max points, fee.</li><li>Record a decline: pick the reason, then text the shop why in one tap.</li></ul></div></div></details>
+      <details><summary><span class="n">5</span><div><b>The offer goes out</b><span>Points, payments and the shop's commission.</span></div></summary>
+        <div class="body"><div><h3>What happens</h3><p>The shop adds its points and presents the offer. The merchant picks one.</p></div>
+        <div><h3>In ISO Desk</h3><ul><li>Slide the points to see the merchant's payment, payback, estimated APR and what the shop earns.</li><li>Press Merchant picked this. The deal moves to Contracts out.</li><li>Today flags an offer the shop has not answered after 2 days.</li></ul></div></div></details>
+      <details><summary><span class="n">6</span><div><b>Contracts and funding</b><span>Everything in before it funds.</span></div></summary>
+        <div class="body"><div><h3>What happens</h3><p>Contract signed, documents verified, a funding call, then the money goes out.</p></div>
+        <div><h3>In ISO Desk</h3><ul><li>The checklist: contract signed, voided check, driver's license, proof of ownership, bank login verified, funding call.</li><li>In CA, CT, FL, GA, KS, MO, NY, UT and VA it adds the cost disclosure the law requires.</li><li>Mark funded once it is all in. It will not let you before.</li></ul></div></div></details>
+      <details><summary><span class="n">7</span><div><b>After it funds</b><span>Commission, payback and the renewal.</span></div></summary>
+        <div class="body"><div><h3>What happens</h3><p>The shop gets its commission. The merchant pays back daily or weekly and can usually renew at half paid.</p></div>
+        <div><h3>In ISO Desk</h3><ul><li>Mark the shop's commission paid, so you can answer them when they ask.</li><li>See how much is paid back and the date it reaches half.</li><li>At half paid it shows on Today. Start renewal makes a new deal under the same shop.</li></ul></div></div></details>
+      <details><summary><span class="n">8</span><div><b>Your data</b><span>Import, download and backups.</span></div></summary>
+        <div class="body"><div><h3>What happens</h3><p>Your shops and history are yours, and they move with you.</p></div>
+        <div><h3>In ISO Desk</h3><ul><li>Import takes phone contacts, a SmartMCA or Excel export saved as CSV, or a backup.</li><li>Settings, Your data: download your shops and people, your deals, or a full backup any time.</li><li>Everything saves to your account and stays in sync on every device. If your connection drops, changes wait on the device and save when you are back online.</li></ul></div></div></details>
+    </div>
+
+    <h2>Words you will see</h2>
+    <p>The same words the desk uses on screen.</p>
+    <div class="gloss2">
+      <div><b>ISO, or shop</b><span>A broker shop that sends us merchants.</span></div>
+      <div><b>Factor rate</b><span>What the merchant pays back per dollar. 1.35 on $10,000 is $13,500 back.</span></div>
+      <div><b>Buy rate and points</b><span>Our price to the shop, plus what the shop adds. Each point adds 0.01 to the factor and pays the shop 1% of the advance.</span></div>
+      <div><b>Open positions</b><span>Other cash advances the merchant is still paying back.</span></div>
+      <div><b>Renewal</b><span>A new advance for the same merchant, usually once half the last one is paid back.</span></div>
+      <div><b>Gone quiet</b><span>A shop with no new deal in 30 days.</span></div>
+    </div>
+
+    <h2>Coming next</h2>
+    <div class="next-list"><b>Being set up now.</b>
+      <ul>
+        <li>Calls and texts straight from ISO Desk on your Connect UC line, (305) 280-5556, with no copy and paste. Until then, Call opens Connect UC and Text copies your message for you to paste in.</li>
+        <li>Logins for teammates, once you have had a week with it.</li>
+        <li>Tell Yonatan what else you want: click your name in ISO Desk, then Send Yonatan feedback.</li>
+      </ul>
+    </div>
+
+    <div class="cta"><a class="btn primary" href="/">Open ISO Desk</a><a class="btn" href="/demo/">Practice on the demo</a><a class="btn" href="iso-desk-walkthrough.mp4" download>Download the video</a></div>
+  </main>
+</body>
+</html>

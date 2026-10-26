@@ -1,0 +1,289 @@
+--- /private/tmp/claude-502/-Users-yonatan-Personal-Stock-App-Josh-CRM/3ae0ea6b-72f5-47d4-8f51-5dfae6cd2872/scratchpad/film2/public/app.js	2026-10-15 11:38:33
++++ /private/tmp/claude-502/-Users-yonatan-Personal-Stock-App-Josh-CRM/3ae0ea6b-72f5-47d4-8f51-5dfae6cd2872/scratchpad/excel-film/public/app.js	2026-10-15 15:04:12
+@@ -28,7 +28,7 @@
+   function addDays(s, n) { var d = parseDay(s); d.setDate(d.getDate() + n); return A.dateOnly(d); }
+   function addMonth(s) { var d = parseDay(s); d.setMonth(d.getMonth() + 1); return A.dateOnly(d); }
+   function hhmm(d) { return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
+-  function fmtDay(iso) { return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
++  function fmtDay(iso) { return new Date(iso).toLocaleDateString('en-GB', { month: 'short', day: 'numeric' }); }
+   function agoText(iso) { var n = daysSince(iso); return n <= 0 ? 'today' : n === 1 ? 'yesterday' : n + ' days ago'; }
+   function minsAgo(iso) {
+     var m = Math.round((Date.now() - new Date(iso)) / 60000);
+@@ -36,7 +36,7 @@
+     var h = Math.round(m / 60); if (h < 24 && daysSince(iso) === 0) return h + (h === 1 ? ' hour ago' : ' hours ago');
+     return cap(agoText(iso));
+   }
+-  function timeText(iso) { var n = daysSince(iso); var t = new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }); return n <= 0 ? 'Today ' + t : n === 1 ? 'Yesterday ' + t : fmtDay(iso) + ', ' + t; }
++  function timeText(iso) { var n = daysSince(iso); var t = new Date(iso).toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit' }); return n <= 0 ? 'Today ' + t : n === 1 ? 'Yesterday ' + t : fmtDay(iso) + ', ' + t; }
+   function fmtTime(t) { if (!t) return ''; var p = t.split(':'), h = +p[0]; return (h % 12 || 12) + ':' + p[1] + (h < 12 ? ' AM' : ' PM'); }
+   function fmtDur(sec) { sec = Math.max(0, Math.round(sec)); return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0'); }
+   function money(n) { return A.money0(n); }
+@@ -154,7 +154,7 @@
+       if (!okId(r.shopId)) return null;
+       if (A.STAGE_INDEX[r.stage] === undefined) r.stage = 'submitted';
+       var m = r.merchant && typeof r.merchant === 'object' ? r.merchant : {};
+-      r.merchant = { business: str(m.business, 200) || 'Unnamed merchant', owner: str(m.owner, 120), industry: str(m.industry, 60), state: str(m.state, 2),
++      r.merchant = { business: str(m.business, 200) || 'Unnamed merchant', owner: str(m.owner, 120), industry: str(m.industry, 60), state: str(m.state, 40),
+         monthlyRevenue: num(m.monthlyRevenue), tibMonths: num(m.tibMonths), fico: num(m.fico), positions: num(m.positions), phone: str(m.phone, 30), email: str(m.email, 160) };
+       r.requested = num(r.requested);
+       ['contactId', 'acceptedOfferId', 'renewalOf'].forEach(function (k) { if (!okId(r[k])) r[k] = null; });
+@@ -356,7 +356,7 @@
+   function renewalState(d) {
+     if (!d.funded) return null;
+     if (d.funded.noTerms) return { kind: 'noterms', p: null };
+-    var p = A.fundedProgress(d.funded);
++    var p = d.repay && d.repay.payments ? A.repayProgress(d) : A.fundedProgress(d.funded);
+     if (d.funded.status === 'stopped') return { kind: 'stopped', p: p };
+     if (p.paidPct >= 1) return { kind: 'paid', p: p };
+     if (I.renewing[d.id]) return { kind: 'renewing', p: p, id: I.renewing[d.id] };
+@@ -375,8 +375,8 @@
+     if (n === -1) return 'Yesterday' + t;
+     if (n === 0) return 'Today' + t;
+     if (n === 1) return 'Tomorrow' + t;
+-    if (n < 7) return parseDay(f.due).toLocaleDateString('en-US', { weekday: 'long' }) + t;
+-    return parseDay(f.due).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + t;
++    if (n < 7) return parseDay(f.due).toLocaleDateString('en-GB', { weekday: 'long' }) + t;
++    return parseDay(f.due).toLocaleDateString('en-GB', { month: 'short', day: 'numeric' }) + t;
+   }
+   function repeatLabel(r) { var x = A.REPEATS.filter(function (y) { return y[0] === (r || ''); })[0]; return x ? x[1] : ''; }
+   function myFUs() {
+@@ -507,15 +507,19 @@
+     var upcoming = fus.filter(function (x) { var n = dueDiff(x.f.due); return n > 0 && n <= 7; });
+     var nowN = due.filter(function (x) { return fuIsDue(x.f); }).length;
+     var seen = {}; due.forEach(function (x) { seen[x.rec.id] = 1; });
+-    var date = A.TODAY.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
++    var date = A.TODAY.toLocaleDateString('en-GB', { weekday: 'long', month: 'long', day: 'numeric' });
+     var sub = date + '. ' + (due.length ? plural(due.length, 'follow-up') + ' today' + (nowN ? ', ' + nowN + ' due now' : '') + '.' : 'No follow-ups due today.');
+     var html = pageHead('Today', esc(sub), LIVE ? alertsBtn() : desktopBtn()) + (LIVE ? setupCard() : '');
++    var mr = missedRepayments(seen);
++    if (mr.length) html += section('miss', 'Missed repayments', mr.length, '', mr.map(missRow).join(''));
+     html += section('fu', 'Follow-ups', due.length, '<button class="btn sm" data-act="fu-new">' + ICON.plus + 'Add a follow-up</button>',
+       (due.length ? due.map(fuRow).join('') : '<div class="empty-line">Nothing due today. Add one for anyone you need to chase.</div>') +
+       (upcoming.length ? '<button class="more-line" data-act="toggle-upcoming">' + (UI.showUpcoming ? 'Hide the rest of the week' : upcoming.length + ' more later this week') + '</button>' + (UI.showUpcoming ? upcoming.map(fuRow).join('') : '') : ''));
+     var m = LIVE ? { rows: [] } : messageRows();
+     if (m.rows.length) html += section('msg', 'Messages', m.count, '<button class="btn sm ghost" data-act="nav" data-v="messages">Open messages</button>', m.rows.join(''));
+     var capped = function (id, list) { var all = UI.more === id, rows = (all ? list : list.slice(0, 8)).map(todoRow).join(''); return rows + (list.length > 8 && !all ? '<button class="more-line" data-act="more" data-v="' + id + '">Show the other ' + (list.length - 8) + '</button>' : ''); };
++    var na = newApps(seen);
++    if (na.length) html += section('new', 'New applications', na.length, '', na.map(todoRow).join(''));
+     var dr = pushDeals(seen, st);
+     if (dr.length) html += section('deals', 'Deals that need a push', dr.length, '', capped('deals', dr));
+     var rn = renewalsReady(seen);
+@@ -524,6 +528,35 @@
+     if (sr.length) html += section('shops', 'Shops to call', sr.length, '', capped('shops', sr));
+     return html;
+   }
++  // From the repayments app: the latest collection failed and nothing has come in since.
++  function missedRepayments(seen) {
++    var out = [];
++    I.deals.forEach(function (d) {
++      if (!d.funded || !d.repay || d.funded.status === 'stopped') return;
++      var p = A.repayProgress(d);
++      if (p.failed && daysSince(p.failed.at) <= 7) { seen[d.id] = 1; out.push({ d: d, p: p }); }
++    });
++    return out.sort(function (a, b) { return a.p.failed.at < b.p.failed.at ? 1 : -1; });
++  }
++  function missRow(x) {
++    var d = x.d, f = x.p.failed, n = daysSince(f.at), c = { name: d.merchant.owner, phone: d.merchant.phone };
++    return '<div class="row trow click" data-act="open" data-type="deal" data-id="' + esc(d.id) + '" data-tab="repay"><div class="when due">' + (n <= 0 ? 'Today' : n === 1 ? 'Yesterday' : n + ' days ago') + '</div>' +
++      '<div class="main"><b>' + esc(d.merchant.business) + '</b> <span class="muted">' + esc(d.merchant.owner) + '</span><div class="sub">' + money(f.amount) + ' repayment failed: ' + esc(f.reason.toLowerCase()) + '.</div></div>' +
++      '<div class="acts">' + callText(c, 'deal', d.id) + '<button class="btn sm" data-act="open" data-type="deal" data-id="' + esc(d.id) + '" data-tab="repay">See repayments</button></div></div>';
++  }
++  // New applications, from the website and from brokers, newest first.
++  function newApps(seen) {
++    var out = [];
++    I.deals.forEach(function (d) {
++      if (d.stage !== 'submitted' || seen[d.id] || daysSince(d.submittedAt) > 1) return;
++      seen[d.id] = 1;
++      var s = shopOf(d) || { name: 'a broker' }, miss = fileMissing(d), m = d.merchant;
++      out.push({ type: 'deal', rec: d, tab: 'paperwork', when: daysSince(d.submittedAt) ? 'Yesterday' : new Date(d.submittedAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
++        sub: money(d.requested) + ' for ' + (m.industry || 'a business').toLowerCase() + ' in ' + m.state + '. ' + (d.shopId === 'web' ? 'Applied on your website' : 'From ' + s.name) + (miss.length ? ', missing the ' + words(miss.map(function (x) { return x.short; })) : '') + '.',
++        btn: miss.length ? null : { act: 'to-uw', label: 'Send to underwriting' }, k: d.submittedAt });
++    });
++    return out.sort(function (a, b) { return a.k < b.k ? 1 : -1; });
++  }
+   function section(id, title, count, right, body) {
+     return '<section class="panel tsec" id="t-' + id + '" data-spec-id="today-' + id + '"><div class="panel-head"><h2>' + esc(title) + (count ? '<span class="cnt">' + count + '</span>' : '') + '</h2>' + right + '</div><div class="rows">' + body + '</div></section>';
+   }
+@@ -605,7 +638,7 @@
+     I.deals.forEach(function (d) {
+       if (ownerOf(d) !== ME || seen[d.id]) return;
+       var rs = renewalState(d);
+-      if (rs && rs.kind === 'ready') out.push({ type: 'deal', rec: d, tab: 'offers', when: pct(rs.p.paidPct) + ' paid back', sub: 'Can renew. Tell ' + ((shopOf(d) || {}).name || 'the shop') + '.', btn: { act: 'renew', label: 'Start renewal' }, k: rs.p.paidPct });
++      if (rs && rs.kind === 'ready') out.push({ type: 'deal', rec: d, tab: d.repay ? 'repay' : 'offers', when: pct(rs.p.paidPct) + ' paid back', sub: 'Can renew. ' + (d.shopId === 'web' ? 'Call ' + first(d.merchant.owner) + '.' : 'Tell ' + ((shopOf(d) || {}).name || 'the shop') + '.'), btn: { act: 'renew', label: 'Start renewal' }, k: rs.p.paidPct });
+     });
+     return out.sort(function (a, b) { return b.k - a.k; });
+   }
+@@ -768,7 +801,7 @@
+     var right = bookButton() + msButton('shops', 'Shop', 'Any shop', shopOptions) +
+       '<button class="ms' + (UI.f.since !== 'any' ? ' on' : '') + '" data-act="since">Submitted: <b>' + SINCE.filter(function (s) { return s[0] === UI.f.since; })[0][1] + '</b>' + ICON.down + '</button>' +
+       '<button class="btn primary" data-act="new-deal" data-spec-id="log-submission">' + ICON.plus + 'Log a submission</button>';
+-    var month = A.TODAY.toLocaleDateString('en-US', { month: 'long' });
++    var month = A.TODAY.toLocaleDateString('en-GB', { month: 'long' });
+     var sub = month + ' so far: <button class="link" data-act="month-list" data-v="sub">' + plural(mn.sub.length, 'deal') + ' in</button>, <button class="link" data-act="month-list" data-v="appr">' + mn.appr.length + ' approved</button>, <button class="link" data-act="month-list" data-v="fund">' + mn.fund.length + ' funded for ' + money(mn.amt) + '</button>.';
+     return pageHead('Deals', sub, right) + readback(shown, 'deal') +
+       '<div class="board" data-spec-id="deals-board">' + cols.map(function (c) {
+@@ -850,7 +883,7 @@
+   function dealDrawer(d) {
+     var s = shopOf(d) || { name: 'Unknown shop', contacts: [] }, c = dealContact(d), m = d.merchant;
+     var head = '<div class="d-head">' + backLink() + '<div class="d-top"><div class="d-title"><h2>' + esc(m.business) + (d.renewalOf ? ' <span class="pill accent">Renewal</span>' : '') + '</h2>' +
+-      '<div class="who"><span>' + esc(m.owner) + '</span><span>' + esc(m.industry) + ', ' + esc(m.state) + '</span><span>From <button class="link" data-act="open" data-type="shop" data-id="' + esc(d.shopId) + '">' + esc(s.name) + '</button>' + (c ? ', sent by ' + esc(c.name) : '') + '</span>' + (ownerOf(d) !== ME ? '<span>' + esc(whose(ownerOf(d))) + '</span>' : '') + '</div></div>' +
++      '<div class="who"><span>' + esc(m.owner) + '</span><span>' + esc(m.industry) + ', ' + esc(m.state) + '</span><span>' + (d.shopId === 'web' ? 'Applied on your website' : 'From <button class="link" data-act="open" data-type="shop" data-id="' + esc(d.shopId) + '">' + esc(s.name) + '</button>' + (c ? ', sent by ' + esc(c.name) : '')) + '</span>' + (ownerOf(d) !== ME ? '<span>' + esc(whose(ownerOf(d))) + '</span>' : '') + '</div></div>' +
+       '<div class="d-actions">' + headActions('deal', d) + '</div></div>' + fuList('deal', d) +
+       // A blank on the form or a column the import did not have reads "Not given", never a made-up 0.
+       '<div class="facts">' + fact('Requested', d.requested ? money(d.requested) : 'Not given', !!d.requested) + fact('Monthly revenue', m.monthlyRevenue ? money(m.monthlyRevenue) : 'Not given', !!m.monthlyRevenue) +
+@@ -858,7 +891,7 @@
+       fact('<span class="term" data-tip="The owner\'s personal credit score.">Credit score</span>', m.fico || 'Not given') +
+       fact('<span class="term" data-tip="Other cash advances the merchant is still paying back. More positions, more risk.">Open positions</span>', d.importedAt && !m.positions ? 'Not given' : m.positions) +
+       fact('Submitted', fmtDay(d.submittedAt)) + '</div>' + stageTrack(d) +
+-      tabsHtml([['paperwork', 'Paperwork'], ['offers', 'Offers', d.offers.length], ['activity', 'Activity', d.activity.length]]) + '</div>';
++      tabsHtml((d.funded && d.repay ? [['repay', 'Repayments']] : []).concat([['paperwork', 'Paperwork'], ['offers', 'Offers', d.offers.length], ['activity', 'Activity', d.activity.length]])) + '</div>';
+     var rivals = rivalSubs(d), rival = '';
+     if (rivals.length) {
+       var r0 = rivals[0], rs0 = shopOf(r0) || { name: 'Another shop' }, earlier = r0.submittedAt < d.submittedAt;
+@@ -866,7 +899,23 @@
+         '<button class="btn sm" data-act="open" data-type="deal" data-id="' + esc(r0.id) + '">Open theirs</button>');
+     }
+     return head + '<div class="d-body">' + nextStep(d) + rival + (drawer.hint ? '<div class="hint">' + esc(drawer.hint) + '</div>' : '') +
+-      (drawer.tab === 'paperwork' ? dealPaperwork(d) : drawer.tab === 'offers' ? dealOffers(d) : activityTab('deal', d)) + '</div>';
++      (drawer.tab === 'repay' && d.funded && d.repay ? dealRepay(d) : drawer.tab === 'paperwork' || drawer.tab === 'repay' ? dealPaperwork(d) : drawer.tab === 'offers' ? dealOffers(d) : activityTab('deal', d)) + '</div>';
++  }
++  // What the repayments app reports for this deal: the bank approval, every collection, and what is left.
++  function dealRepay(d) {
++    var p = A.repayProgress(d), r = d.repay, list = (r.payments || []).slice().sort(function (a, b) { return a.at < b.at ? 1 : -1; });
++    var day = function (iso) { return new Date(iso).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }); };
++    var bank = r.status === 'cancelled' ? '<div class="v word bad">Cancelled</div><div class="sub">' + esc(r.bank) + ', by the business</div>' : '<div class="v word">' + esc(r.bank) + '</div><div class="sub">Approved, up to ' + money(r.maxPayment) + ' a payment</div>';
++    var html = '<div class="sec" data-spec-id="repayments"><div class="sec-h"><div><h3>Repayments</h3><p>From your repayments app. Collected weekly from their bank.</p></div></div>' +
++      '<div class="repay-top"><div><div class="l">Collected</div><div class="v money">' + money(p.collected) + '</div><div class="sub">of ' + money(p.payback) + ', ' + pct(p.paidPct) + '</div></div>' +
++      '<div><div class="l">Next collection</div><div class="v money">' + (p.next && r.status !== 'cancelled' ? money(p.next.amount) : '-') + '</div><div class="sub">' + (p.next && r.status !== 'cancelled' ? day(p.next.at) : 'None scheduled') + '</div></div>' +
++      '<div><div class="l">Their bank</div>' + bank + '</div></div>' +
++      '<div class="repay-bar"><div class="bar big' + (p.paidPct >= 0.5 ? ' good' : '') + '"><i style="width:' + Math.max(2, p.paidPct * 100) + '%"></i><span class="half"></span></div></div>' +
++      (list.length ? list.map(function (x) {
++        var ok = x.status === 'collected';
++        return '<div class="pay-row' + (ok ? '' : ' bad') + '"><span>' + esc(day(x.at)) + '</span><span class="amt">' + money(x.amount) + '</span><span>' + (ok ? '<span class="pill good">' + (x.retry ? 'Collected on retry' : 'Collected') + '</span>' : '<span class="pill bad">Failed</span> <span class="why">' + esc(x.reason) + '</span>') + '</span></div>';
++      }).join('') : '<div class="repay-foot">The first collection goes out ' + esc(p.next ? day(p.next.at) : 'next week') + '.</div>') + '</div>';
++    return html;
+   }
+   function fact(label, value, isMoney) { return '<div class="fact"><div class="l">' + label + '</div><div class="v' + (isMoney ? ' money' : '') + '">' + esc(value) + '</div></div>'; }
+   function stageTrack(d) {
+@@ -895,17 +944,22 @@
+       btn = drawer.tab === 'offers' ? '' : '<button class="btn primary" data-act="tab" data-v="offers">Mark the offer they picked</button>'; tone = late ? 'bad' : '';
+     } else if (d.stage === 'contracts') {
+       var cm = closingMissing(d);
+-      if (cm.length) { t = plural(cm.length, 'thing') + ' left before it can fund.'; sub = words(cm.map(function (x) { return x.label; })) + '.'; btn = drawer.tab === 'paperwork' ? '' : '<button class="btn" data-act="tab" data-v="paperwork">Open the checklist</button>'; }
+-      else { t = 'Everything is in.'; sub = 'Contract signed, paperwork verified, funding call done.'; btn = '<button class="btn primary" data-act="move" data-v="funded">Mark funded</button>'; tone = 'good'; }
++      if (cm.length === 1 && cm[0].id === 'repay' && d.repay && d.repay.status === 'sent') { t = 'Waiting on ' + first(d.merchant.owner) + ' to approve repayments in their bank.'; sub = 'The link went to ' + d.repay.to + '. This ticks itself when they approve.'; }
++      else if (cm.length) { t = plural(cm.length, 'thing') + ' left before it can fund.'; sub = words(cm.map(function (x) { return x.label; })) + '.'; btn = drawer.tab === 'paperwork' ? '' : '<button class="btn" data-act="tab" data-v="paperwork">Open the checklist</button>'; }
++      else { t = 'Everything is in.'; sub = 'Contract signed, checks done, repayments approved in their bank.'; btn = '<button class="btn primary" data-act="move" data-v="funded">Mark funded</button>'; tone = 'good'; }
+     } else if (d.stage === 'funded') {
+       var rs = renewalState(d); tone = 'good';
+       t = 'Funded ' + money(d.funded.amount) + ' on ' + fmtDay(d.funded.fundedAt) + '.';
+-      if (rs.kind === 'ready') { sub = pct(rs.p.paidPct) + ' paid in, so the merchant can renew. Tell ' + s.name + '.'; btn = '<button class="btn primary" data-act="renew">Start renewal</button>'; }
++      var rp = d.repay && d.repay.payments ? A.repayProgress(d) : null;
++      if (rp && !rp.made && !rp.failed && d.funded.status !== 'stopped') { sub = 'Repayments start ' + (rp.next ? new Date(rp.next.at).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) : 'next week') + ': ' + (rp.next ? money(rp.next.amount) : '') + ' a week from their ' + d.repay.bank + ' account.'; btn = ''; rs = { kind: 'skip' }; }
++      else if (rp && rp.failed && d.funded.status !== 'stopped') { t = 'The last repayment failed, ' + agoText(rp.failed.at) + '.'; sub = money(rp.failed.amount) + ': ' + rp.failed.reason.toLowerCase() + '. ' + money(rp.collected) + ' collected so far.'; tone = 'bad'; btn = callText({ name: d.merchant.owner, phone: d.merchant.phone }, 'deal', d.id); rs = { kind: 'skip' }; }
++      if (rs.kind === 'ready') { sub = (rp ? money(rp.collected) + ' collected, ' : '') + pct(rs.p.paidPct) + ' paid back, so the merchant can renew. ' + (d.shopId === 'web' ? 'Call ' + first(d.merchant.owner) + '.' : 'Tell ' + s.name + '.'); btn = '<button class="btn primary" data-act="renew">Start renewal</button>'; }
+       else if (rs.kind === 'renewing') { sub = 'Renewal under way.'; btn = '<button class="btn" data-act="open" data-type="deal" data-id="' + esc(rs.id) + '">Open the renewal</button>'; }
+       else if (rs.kind === 'stopped') { sub = 'Payments stopped on ' + fmtDay(d.funded.stoppedAt) + '. Not eligible to renew.'; tone = 'bad'; }
+       else if (rs.kind === 'paid') sub = 'Paid off in full.';
++      else if (rs.kind === 'skip') { /* set above */ }
+       else if (rs.kind === 'noterms') { sub = 'The advance terms were not in the import, so the renewal date is unknown.'; btn = '<button class="btn" data-act="edit-deal">Add the terms</button>'; tone = ''; }
+-      else sub = pct(rs.p.paidPct) + ' paid in. Can renew at 50%, around ' + fmtDay(new Date(Date.now() + rs.p.daysToHalf * A.DAY).toISOString()) + '.';
++      else sub = (rp ? money(rp.collected) + ' collected, ' : '') + pct(rs.p.paidPct) + ' paid back. Can renew at 50%, around ' + fmtDay(new Date(Date.now() + rs.p.daysToHalf * A.DAY).toISOString()) + '.';
+     } else {
+       var cl = d.closed || { kind: 'lost', reason: 'Unknown' };
+       t = (cl.kind === 'declined' ? 'Underwriting declined it: ' : 'Lost: ') + cl.reason + '.'; sub = cl.note || 'No note.'; tone = 'bad';
+@@ -925,7 +979,13 @@
+     if (d.acceptedOfferId || d.stage === 'contracts' || d.stage === 'funded') {
+       var items = closingItems(d), left = closingMissing(d).length, disc = A.DISCLOSURE_STATES.indexOf(d.merchant.state) >= 0;
+       closing = '<div class="sec" data-spec-id="closing-checklist"><div class="sec-h"><div><h3>Before it can fund</h3><p>' + (left ? left + ' of ' + items.length + ' left.' : 'All ' + items.length + ' done.') + (disc ? ' ' + esc(d.merchant.state) + ' law requires a cost disclosure before the merchant signs.' : '') + '</p></div></div>' +
+-        items.map(function (c) { return '<button class="chk' + (d.closing[c.id] ? ' ok' : '') + '" data-act="closing" data-v="' + esc(c.id) + '"><span class="box">' + (d.closing[c.id] ? ICON.check : '') + '</span><span>' + esc(c.label) + '</span><span class="meta">' + (d.closing[c.id] ? 'Done ' + esc(timeText(d.closing[c.id])) : 'Not yet') + '</span></button>'; }).join('') + '</div>';
++        items.map(function (c) {
++          if (c.id === 'repay' && !d.closing.repay) {
++            var sent = d.repay && d.repay.status === 'sent';
++            return '<div class="chk" data-spec-id="bank-link"><span class="box"></span><span>' + esc(c.label) + (sent ? '<span class="muted" style="display:block;font-size:12.5px">Link sent to ' + esc(d.repay.to) + '. Waiting for them to approve.</span>' : '') + '</span><span class="meta">' + (sent ? '<button class="btn sm ghost" data-act="bank-link">Send again</button>' : '<button class="btn sm primary" data-act="bank-link">Send bank link</button>') + '</span></div>';
++          }
++          return '<button class="chk' + (d.closing[c.id] ? ' ok' : '') + '" data-act="closing" data-v="' + esc(c.id) + '"><span class="box">' + (d.closing[c.id] ? ICON.check : '') + '</span><span>' + esc(c.label) + (c.id === 'repay' && d.repay && d.repay.bank ? ' <span class="muted">' + esc(d.repay.bank) + ', up to ' + money(d.repay.maxPayment) + ' a payment</span>' : '') + '</span><span class="meta">' + (d.closing[c.id] ? 'Done ' + esc(timeText(d.closing[c.id])) : 'Not yet') + '</span></button>';
++        }).join('') + '</div>';
+     }
+     return d.stage === 'contracts' ? closing + file : file + closing;
+   }
+@@ -1249,7 +1309,7 @@
+     addShop: function (m) {
+       return { title: 'Add a shop', sub: 'It goes straight into your book. As you type, we check whether the shop is already here under another spelling.', submit: 'Add shop', spec: 'add-shop',
+         body: '<div class="grid2">' + field('Shop name', input('name', m.name || '', 'text', ' autofocus autocomplete="off" data-in="addshop-name"'), 'wide') +
+-          '<div class="wide" id="addshop-match">' + addShopMatches(m.name || '') + '</div>' + field('State', select('state', A.STATES, 'FL')) + '<span></span>' +
++          '<div class="wide" id="addshop-match">' + addShopMatches(m.name || '') + '</div>' + field('Region', select('state', A.STATES, 'FL')) + '<span></span>' +
+           '<div class="form-sec wide">Main contact (optional)</div>' + field('Name', input('owner', '')) + field('Role', select('role', A.CONTACT_ROLES, 'Owner')) + field('Phone', input('phone', '', 'tel')) + field('Email', input('email', '', 'email')) +
+           '<label class="checkline wide"><input type="checkbox" name="signed"> The ISO agreement is signed</label></div>' };
+     },
+@@ -1265,7 +1325,7 @@
+           field('Sent by', '<span id="nd-contact">' + select('contactId', (shop ? shop.contacts : []).map(function (c) { return [c.id, c.name + ', ' + c.role]; }), '') + '</span>') +
+           field('Business name', input('business', '', 'text', ' autofocus autocomplete="off" data-in="newdeal-biz"')) + field('Owner', input('owner', '')) + field('Industry', select('industry', [['', 'Pick one']].concat(A.INDUSTRIES), '')) +
+           '<div class="span3" id="nd-match"></div>' +
+-          field('State', select('state', [['', 'Pick one']].concat(A.STATES), '')) + field('Monthly revenue', input('monthlyRevenue', '', 'number', ' min="0" step="1000" placeholder="$"')) + field('Amount requested', input('requested', '', 'number', ' min="0" step="1000" placeholder="$"')) +
++          field('Region', select('state', [['', 'Pick one']].concat(A.STATES), '')) + field('Monthly revenue', input('monthlyRevenue', '', 'number', ' min="0" step="1000" placeholder="£"')) + field('Amount requested', input('requested', '', 'number', ' min="0" step="1000" placeholder="£"')) +
+           field('Time in business (months)', input('tibMonths', '', 'number', ' min="0"')) + field('Credit score', input('fico', '', 'number', ' min="300" max="850"')) + field('Open positions', select('positions', ['0', '1', '2', '3', '4', '5'], '0')) +
+           '<div class="form-sec span3">What came with it</div><div class="span3 checks"><label class="checkline"><input type="checkbox" name="app" checked> Signed application</label>' +
+           A.statementMonths().map(function (mk) { return '<label class="checkline"><input type="checkbox" name="st_' + mk + '" checked> ' + A.monthLabel(mk, true) + ' statement</label>'; }).join('') + '</div></div>' };
+@@ -1307,7 +1367,7 @@
+     editShop: function (m) {
+       var s = DB.shops[m.shopId], n = (I.dealsByShop[s.id] || []).length;
+       return { title: 'Edit shop', submit: 'Save', spec: 'edit-shop', left: n ? '' : '<button type="button" class="btn danger left" data-act="shop-delete">Delete shop</button>',
+-        body: '<div class="grid2">' + field('Shop name', input('name', s.name), 'wide') + field('State', select('state', [['', 'Pick one']].concat(s.state && A.STATES.indexOf(s.state) < 0 ? [s.state] : []).concat(A.STATES), s.state || '')) + '<span></span>' +
++        body: '<div class="grid2">' + field('Shop name', input('name', s.name), 'wide') + field('Region', select('state', [['', 'Pick one']].concat(s.state && A.STATES.indexOf(s.state) < 0 ? [s.state] : []).concat(A.STATES), s.state || '')) + '<span></span>' +
+           field('About this shop', '<textarea name="about" rows="3">' + esc(s.about || '') + '</textarea>', 'wide') +
+           '<label class="checkline wide"><input type="checkbox" name="signed"' + (s.agreementAt ? ' checked' : '') + '> The ISO agreement is signed</label>' +
+           '<label class="checkline wide"><input type="checkbox" name="w9"' + (s.w9At ? ' checked' : '') + '> We have their W-9</label>' +
+@@ -1320,7 +1380,7 @@
+       var inds = x.industry && A.INDUSTRIES.indexOf(x.industry) < 0 ? [x.industry].concat(A.INDUSTRIES) : A.INDUSTRIES, states = x.state && A.STATES.indexOf(x.state) < 0 ? [x.state].concat(A.STATES) : A.STATES;
+       return { title: 'Edit deal', submit: 'Save', wide: true, left: '<button type="button" class="btn danger left" data-act="deal-delete">Delete deal</button>',
+         body: '<div class="grid3">' + field('Business name', input('business', x.business)) + field('Owner', input('owner', x.owner)) + field('Industry', select('industry', inds, x.industry)) +
+-          field('State', select('state', states, x.state)) + field('Monthly revenue', input('monthlyRevenue', x.monthlyRevenue, 'number')) + field('Amount requested', input('requested', d.requested, 'number')) +
++          field('Region', select('state', states, x.state)) + field('Monthly revenue', input('monthlyRevenue', x.monthlyRevenue, 'number')) + field('Amount requested', input('requested', d.requested, 'number')) +
+           field('Time in business (months)', input('tibMonths', x.tibMonths, 'number')) + field('Credit score', input('fico', x.fico, 'number')) + field('Open positions', select('positions', ['0', '1', '2', '3', '4', '5'], String(x.positions))) +
+           field('Merchant phone', input('mphone', x.phone || '', 'tel')) + field('Merchant email', input('memail', x.email || '', 'email')) + '<span></span>' +
+           (fd ? '<div class="form-sec span3">What funded</div>' + field('Funded amount', input('fAmount', fd.amount, 'number', ' min="0"')) + field('Funded on', input('fDate', A.dateOnly(fd.fundedAt), 'date')) +
+@@ -1982,6 +2042,13 @@
+   }
+ 
+   // ================= ACTIONS =================
++  // In the live build the repayments app tells the desk when the business approves. Here the recording calls it.
++  window.EXCEL = { approveBank: function (id, bank) {
++    var x = DB.deals[id], o = acceptedOffer(x), pay = Math.round(A.payback(o) / A.paymentCount(Object.assign({}, o, { freq: 'weekly' })));
++    x.repay = { status: 'approved', bank: bank || 'NatWest', maxPayment: Math.ceil(pay * 1.2 / 10) * 10, approvedAt: nowISO(), payments: null };
++    x.closing.repay = nowISO(); log(x, 'system', x.merchant.owner + ' approved repayments in their ' + x.repay.bank + ' account.'); put('deals', x); render();
++    toast(x.merchant.business + ' approved repayments in their bank. Ready to fund.', { action: { label: 'Mark funded', fn: function () { moveDeal(DB.deals[id], 'funded'); } } });
++  } };
+   function curRec() { return drawer ? recOf(drawer.type, drawer.id) : null; }
+   function target(el) { var type = el.getAttribute('data-type') || (drawer && drawer.type), id = el.getAttribute('data-id') || (drawer && drawer.id); return { type: type, id: id }; }
+   function withUndo(kind, ids, fn, msg, extra) {
+@@ -2011,7 +2078,7 @@
+       if (x.stage === 'funded' && to !== 'funded') x.funded = null;
+       x.stage = to; x.stageAt = nowISO();
+       if (to === 'contracts' && !x.closing.sent) x.closing.sent = x.stageAt;
+-      if (to === 'funded') { var o = acceptedOffer(x); x.funded = { amount: o.amount, buyRate: o.buyRate, termMonths: o.termMonths, freq: o.freq, fee: o.fee, points: o.points, fundedAt: x.stageAt, status: 'performing', stoppedAt: null, repId: ownerOf(x) }; }
++      if (to === 'funded') { var o = acceptedOffer(x); x.funded = { amount: o.amount, buyRate: o.buyRate, termMonths: o.termMonths, freq: o.freq, fee: o.fee, points: o.points, fundedAt: x.stageAt, status: 'performing', stoppedAt: null, repId: ownerOf(x) }; if (x.repay) x.repay.payments = []; }
+       log(x, 'system', back ? 'Moved back to ' + STAGE_LABEL[to].toLowerCase() + '.' : to === 'funded' ? 'Funded ' + money(x.funded.amount) + '.' : 'Moved to ' + STAGE_LABEL[to].toLowerCase() + '.');
+       put('deals', x);
+     }, to === 'funded' ? 'Funded' : 'Moved to ' + STAGE_LABEL[to]);
+@@ -2084,7 +2151,7 @@
+     'toggle-upcoming': function () { UI.showUpcoming = !UI.showUpcoming; renderMain(); },
+     'all-act': function () { UI.allAct = drawer.id; renderDrawer(); },
+     'all-deals': function () { UI.allDeals = drawer.id; renderDrawer(); },
+-    'month-list': function (el) { var mn = monthNumbers(), v = el.getAttribute('data-v'), month = A.TODAY.toLocaleDateString('en-US', { month: 'long' }); openModal({ kind: 'list', title: v === 'fund' ? 'Funded in ' + month : v === 'appr' ? 'Approved in ' + month : 'Submitted in ' + month, rows: (v === 'fund' ? mn.fund : v === 'appr' ? mn.appr : mn.sub).slice().sort(function (a, b) { return a.submittedAt < b.submittedAt ? 1 : -1; }) }); },
++    'month-list': function (el) { var mn = monthNumbers(), v = el.getAttribute('data-v'), month = A.TODAY.toLocaleDateString('en-GB', { month: 'long' }); openModal({ kind: 'list', title: v === 'fund' ? 'Funded in ' + month : v === 'appr' ? 'Approved in ' + month : 'Submitted in ' + month, rows: (v === 'fund' ? mn.fund : v === 'appr' ? mn.appr : mn.sub).slice().sort(function (a, b) { return a.submittedAt < b.submittedAt ? 1 : -1; }) }); },
+     'desktop-toggle': function () {
+       if (!('Notification' in window)) return;
+       if (UI.desktop && Notification.permission === 'granted') { UI.desktop = false; saveUI(); renderMain(); toast('Desktop alerts off'); return; }
+@@ -2179,6 +2246,11 @@
+       withUndo('deals', [d.id], function () { var x = DB.deals[d.id]; if (had) delete x.closing[k]; else x.closing[k] = nowISO(); log(x, 'system', label + (had ? ' unticked.' : ' done.')); put('deals', x); }, label + (had ? ' unticked' : ' done'));
+       var x = DB.deals[d.id];
+       if (!had && x.stage === 'contracts' && !closingMissing(x).length) toast('Everything is in. Ready to fund.', { action: { label: 'Mark funded', fn: function () { moveDeal(DB.deals[d.id], 'funded'); } } });
++    },
++    // Creates the borrower in the repayments app and emails them the link to approve repayments in their bank.
++    'bank-link': function () {
++      var d = curRec(), m = d.merchant;
++      withUndo('deals', [d.id], function () { var x = DB.deals[d.id]; x.repay = { status: 'sent', to: m.email, sentAt: nowISO(), payments: null }; log(x, 'system', 'Bank link sent to ' + m.email + ' from the repayments app.'); put('deals', x); }, 'Bank link sent to ' + m.email);
+     },
+     'comm-paid': function () { var d = curRec(), had = !!d.funded.commissionPaidAt; withUndo('deals', [d.id], function () { var x = DB.deals[d.id]; x.funded.commissionPaidAt = had ? null : nowISO(); log(x, 'system', had ? 'Shop commission marked unpaid.' : 'Shop commission of ' + money(A.commission(x.funded)) + ' paid.'); put('deals', x); }, had ? 'Marked unpaid' : 'Commission marked paid'); },
+     'renew': function (el) { startRenewal(el.getAttribute('data-id') ? DB.deals[el.getAttribute('data-id')] : curRec()); },

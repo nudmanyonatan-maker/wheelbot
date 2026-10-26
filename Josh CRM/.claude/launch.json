@@ -1,0 +1,31 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "iso-desk",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "wrangler",
+        "pages",
+        "dev",
+        "--port",
+        "8788"
+      ],
+      "port": 8788
+    },
+    {
+      "name": "iso-desk-book",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "wrangler",
+        "pages",
+        "dev",
+        "--port",
+        "8790",
+        "--persist-to",
+        ".wrangler/state-book"
+      ],
+      "port": 8790
+    }
+  ]
+}

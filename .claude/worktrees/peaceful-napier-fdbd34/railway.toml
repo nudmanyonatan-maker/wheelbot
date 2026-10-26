@@ -1,0 +1,10 @@
+# Railway config. The [build] section is intentionally absent — Railway
+# autodetects the Dockerfile at the repo root. Specifying builder = "DOCKERFILE"
+# previously triggered a manifest mismatch (Railway's autodetect now wants
+# RAILPACK), which gated deploys behind NEEDS_APPROVAL and silently blocked
+# every push for ~10 days. Don't add it back unless you also confirm the
+# current schema in Railway docs.
+
+[deploy]
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10

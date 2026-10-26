@@ -1,0 +1,19 @@
+--- /private/tmp/claude-502/-Users-yonatan-Personal-Stock-App-Josh-CRM/3ae0ea6b-72f5-47d4-8f51-5dfae6cd2872/scratchpad/film2/public/index.html	2026-10-15 08:45:59
++++ /private/tmp/claude-502/-Users-yonatan-Personal-Stock-App-Josh-CRM/3ae0ea6b-72f5-47d4-8f51-5dfae6cd2872/scratchpad/excel-film/public/index.html	2026-10-15 14:59:23
+@@ -10,7 +10,7 @@
+   <meta name="apple-mobile-web-app-status-bar-style" content="default">
+   <link rel="manifest" href="/manifest.webmanifest">
+   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+-  <title>ISO Desk</title>
++  <title>Excel Capital</title>
+   <meta name="description" content="Shops, deals, follow-ups, calls and texts for an ISO manager.">
+   <meta name="robots" content="noindex">
+   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%232a43c4'/%3E%3Cpath d='M7 7.5h10M7 12h10M7 16.5h6' stroke='%23fff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+@@ -43,6 +43,7 @@
+     }, 3000);
+   </script>
+   <script src="/data.js"></script>
++  <script src="/lender.js"></script>
+   <script src="/importer.js"></script>
+   <script src="/app.js"></script>
+ </body>

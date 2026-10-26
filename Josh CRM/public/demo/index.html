@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ISO Desk demo</title>
+  <meta name="description" content="Shops, deals, follow-ups, calls and texts for an ISO manager.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%232a43c4'/%3E%3Cpath d='M7 7.5h10M7 12h10M7 16.5h6' stroke='%23fff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="top" id="top">
+    <div class="brand"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#2a43c4"/><path d="M7 7.5h10M7 12h10M7 16.5h6" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg><span>ISO Desk</span></div>
+    <nav class="nav" id="nav" data-spec-id="main-nav"></nav>
+    <div class="top-spacer"></div>
+    <span id="modepill"></span>
+    <div class="search"><span class="sicon"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="7" cy="7" r="4.8"/><path d="M10.6 10.6L14 14" stroke-linecap="round"/></svg></span><input id="q" type="search" placeholder="Find a shop, person or merchant" autocomplete="off" aria-label="Search"></div>
+    <button class="btn primary" data-act="fu-new" data-spec-id="add-follow-up"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M8 3v10M3 8h10" stroke-linecap="round"/></svg><span>Follow-up</span></button>
+    <button class="me" data-act="me-menu" aria-label="Josh Abecassis, menu"><span class="av">JA</span><span>Josh Abecassis</span></button>
+  </header>
+  <main id="main"><div class="boot" id="boot">Loading your desk...</div></main>
+  <div id="drawer-root"></div>
+  <div id="modal-root"></div>
+  <div id="pop-root"></div>
+  <div id="call-root"></div>
+  <div id="sheet-root"></div>
+  <div id="alert-root"></div>
+  <div id="toast-root"></div>
+  <script>
+    // If the app has not drawn after a few seconds, say what failed instead of a blank page.
+    setTimeout(function () {
+      if (window.__ISO_READY) return;
+      var b = document.getElementById('boot');
+      if (b) b.innerHTML = 'The demo did not load. One of these files failed: data.js, importer.js, app.js. Refresh the page, and if it keeps happening send this message to Yonatan.';
+    }, 3000);
+  </script>
+  <script>
+    window.ISODESK_DEMO = true;
+    // Visitors from the product page see a made-up rep instead of Josh.
+    if (/[?&]as=guest\b/.test(location.search)) window.ISODESK_PERSONA = { name: 'Alex Rivera', first: 'Alex', initials: 'AR', phone: '(212) 555-0142' };
+  </script>
+  <script src="/data.js"></script>
+  <script src="/importer.js"></script>
+  <script src="/app.js"></script>
+  <script src="/specs.js"></script>
+  <script src="/spec-mode.js"></script>
+</body>
+</html>

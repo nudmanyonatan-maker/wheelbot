@@ -1,0 +1,8 @@
+{
+  "name": "broker-desk-cron",
+  "main": "index.js",
+  "compatibility_date": "2026-10-01",
+  "triggers": { "crons": ["* * * * *"] },
+  // DESK_URL is the desk's address; CRON_SECRET (a secret) must match the desk's.
+  "vars": { "DESK_URL": "https://broker-desk.pages.dev" }
+}

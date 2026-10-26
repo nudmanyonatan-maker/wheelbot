@@ -1,0 +1,81 @@
+[
+ {
+  "id": "i1",
+  "scene": "intro",
+  "text": "Here's a CRM I built for another lender, set up the way Excel Capital would use it.",
+  "cards": [
+   {
+    "item": "logo",
+    "y": 430,
+    "pop": true
+   },
+   {
+    "item": "tag_i1",
+    "y": 640,
+    "at": "set"
+   }
+  ],
+  "gap": 0.3
+ },
+ {
+  "id": "a1",
+  "scene": "app",
+  "chapter": "Your day",
+  "text": "Every morning starts on Today. At the top: repayments that didn't come in, straight from your repayments app, with the reason."
+ },
+ {
+  "id": "a2",
+  "scene": "app",
+  "text": "Click See repayments, and you get every collection: what came in, and what failed."
+ },
+ {
+  "id": "a3",
+  "scene": "app",
+  "text": "Below that: follow-ups, new applications from your website and your brokers, and renewals that are ready."
+ },
+ {
+  "id": "b1",
+  "scene": "app",
+  "chapter": "Applications",
+  "text": "Click Deals. Every application moves left to right, from new to funded."
+ },
+ {
+  "id": "b2",
+  "scene": "app",
+  "text": "When a broker sends one in, type the business name. If another broker sent it first, it tells you."
+ },
+ {
+  "id": "c1",
+  "scene": "app",
+  "chapter": "Repayments",
+  "text": "Before a deal funds, click Send bank link. The business approves repayments in their own bank."
+ },
+ {
+  "id": "c2",
+  "scene": "app",
+  "text": "When they do, the checklist ticks itself. Click Mark funded."
+ },
+ {
+  "id": "c3",
+  "scene": "app",
+  "text": "Repayments start on their own, and every one shows up on the deal."
+ },
+ {
+  "id": "c4",
+  "scene": "app",
+  "text": "Once a business has paid back half, it's ready to renew."
+ },
+ {
+  "id": "o1",
+  "scene": "outro",
+  "text": "One place for every deal, from first enquiry to last repayment.",
+  "cards": [
+   {
+    "item": "tag_o1",
+    "y": 540,
+    "hold": "scene",
+    "pop": true
+   }
+  ]
+ }
+]

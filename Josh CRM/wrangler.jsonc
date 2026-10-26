@@ -1,0 +1,27 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "iso-desk-josh",
+  "pages_build_output_dir": "./public",
+  "compatibility_date": "2026-10-01",
+  // Production (branch main) and local dev use these.
+  "vars": { "VAPID_PUBLIC_KEY": "BB9v5Mjkgc0TZbiz0A3K2cTHCsCZCXemd4-r7SgllM5dF9Bkspaeru3eDwJn7Jwc-6qGM7vf8hKhBE8AqFXh8q4", "VAPID_SUBJECT": "https://iso-desk-josh.pages.dev" },
+  "kv_namespaces": [
+    { "binding": "NOTES_KV", "id": "264dc2ad83b94dc7ad238974ad96e508" }
+  ],
+  "d1_databases": [
+    { "binding": "DB", "database_name": "iso-desk", "database_id": "99078f93-8644-44a2-b2dc-7b89724068c1", "migrations_dir": "db/migrations" }
+  ],
+  // Preview branches (npm run deploy:preview) get their own database and demo store, so testing
+  // there never touches real data. Pages needs every binding repeated once one is overridden.
+  "env": {
+    "preview": {
+      "vars": { "VAPID_PUBLIC_KEY": "BB9v5Mjkgc0TZbiz0A3K2cTHCsCZCXemd4-r7SgllM5dF9Bkspaeru3eDwJn7Jwc-6qGM7vf8hKhBE8AqFXh8q4", "VAPID_SUBJECT": "https://iso-desk-josh.pages.dev" },
+      "kv_namespaces": [
+        { "binding": "NOTES_KV", "id": "98edbe4905dd41e8ba1752b56b3f9c67" }
+      ],
+      "d1_databases": [
+        { "binding": "DB", "database_name": "iso-desk-preview", "database_id": "b126a7a8-6e44-452f-b989-4e57cf62cb29", "migrations_dir": "db/migrations" }
+      ]
+    }
+  }
+}

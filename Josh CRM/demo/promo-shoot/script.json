@@ -1,0 +1,156 @@
+[
+ {
+  "id": "i1",
+  "scene": "intro",
+  "text": "You run the ISO desk at a funder.",
+  "cards": [
+   {
+    "item": "i1",
+    "y": 540
+   }
+  ]
+ },
+ {
+  "id": "i2",
+  "scene": "intro",
+  "text": "Dozens of broker shops, all sending deals.",
+  "cards": [
+   {
+    "item": "i2a",
+    "y": 470
+   },
+   {
+    "item": "i2b",
+    "y": 650,
+    "at": "all"
+   }
+  ]
+ },
+ {
+  "id": "i3",
+  "scene": "intro",
+  "text": "And every one of them needs a follow-up.",
+  "cards": [
+   {
+    "item": "i3a",
+    "y": 430
+   },
+   {
+    "item": "i3b",
+    "y": 620,
+    "at": "needs"
+   }
+  ],
+  "gap": 0.4
+ },
+ {
+  "id": "i4",
+  "scene": "intro",
+  "text": "Sticky notes. Missed calls. A CRM nobody likes.",
+  "cards": [
+   {
+    "item": "chip_note",
+    "y": 360,
+    "at": "Sticky"
+   },
+   {
+    "item": "chip_phone",
+    "y": 540,
+    "at": "Missed"
+   },
+   {
+    "item": "chip_mail",
+    "y": 720,
+    "at": "CRM"
+   }
+  ]
+ },
+ {
+  "id": "i5",
+  "scene": "intro",
+  "text": "ISO Desk fixes that. Your shops, your deals and your follow-ups, on one simple screen.",
+  "cards": [
+   {
+    "item": "logo",
+    "y": 430,
+    "pop": true
+   },
+   {
+    "item": "tag_i5",
+    "y": 640,
+    "at": "Your"
+   }
+  ]
+ },
+ {
+  "id": "a1",
+  "scene": "app",
+  "chapter": "Start every day here",
+  "text": "Every morning, Today shows exactly who to call, and why."
+ },
+ {
+  "id": "b1",
+  "scene": "app",
+  "chapter": "Never miss a follow-up",
+  "text": "Set a follow-up in a couple of taps. Pick the shop, pick when, say what it's for, and you're done."
+ },
+ {
+  "id": "b2",
+  "scene": "app",
+  "text": "When it's due, it pings your phone, even with the desk closed."
+ },
+ {
+  "id": "c1",
+  "scene": "app",
+  "chapter": "Log every call",
+  "text": "Call from your phone, right from the alert. When you hang up, log what happened, and the next step, all in one box."
+ },
+ {
+  "id": "d1",
+  "scene": "app",
+  "chapter": "Every deal, every stage",
+  "text": "Deals move from submission to funded, and it stops you when a bank statement's missing."
+ },
+ {
+  "id": "d2",
+  "scene": "app",
+  "text": "It even tells you when another shop already sent you the same merchant."
+ },
+ {
+  "id": "o1",
+  "scene": "outro",
+  "text": "ISO Desk. Built for ISO managers. Simple enough to use every day.",
+  "cards": [
+   {
+    "item": "logo",
+    "y": 380,
+    "pop": true
+   },
+   {
+    "item": "tag_o1a",
+    "y": 590,
+    "at": "Built"
+   },
+   {
+    "item": "tag_o1b",
+    "y": 700,
+    "at": "Simple"
+   }
+  ]
+ },
+ {
+  "id": "o2",
+  "scene": "outro",
+  "text": "Want it for your team? Call or text two two four, six one nine, six eight seven six.",
+  "display": "Want it for your team? Call or text (224) 619-6876.",
+  "cards": [
+   {
+    "item": "contact",
+    "y": 540,
+    "hold": "scene",
+    "pop": true
+   }
+  ],
+  "gap": 1.2
+ }
+]

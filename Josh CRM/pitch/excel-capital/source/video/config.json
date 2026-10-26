@@ -1,0 +1,35 @@
+{
+ "output_name": "excel-capital-crm",
+ "brand": {
+  "name": "Excel Capital",
+  "accent": "#5b7cff",
+  "accent2": "#2a43c4"
+ },
+ "voice": {
+  "speaker": "Aiden",
+  "say": {},
+  "instruct": "Friendly, upbeat American guy showing a lender a tool he built, on a quick screen share. Brisk and clear. Natural and warm, not salesy, not robotic."
+ },
+ "capture": {
+  "baseUrl": "http://localhost:8799",
+  "startPath": "/#invite=lM24DSB7Ia2_PIhLCXtrd44kfQZrVN-v_iXYtT-W5ps",
+  "timeout": 4000,
+  "tail": 0.2
+ },
+ "items": {
+  "tag_i1": {
+   "text": "Every deal and every repayment,<br><b style=\"color:#fff\">in one place.</b>",
+   "size": 44,
+   "weight": 500,
+   "color": "#cbd5e1"
+  },
+  "tag_o1": {
+   "text": "From first enquiry<br><b style=\"color:#fff\">to last repayment.</b>",
+   "size": 52,
+   "weight": 500,
+   "color": "#cbd5e1"
+  }
+ },
+ "music": true,
+ "end_hold": 2
+}

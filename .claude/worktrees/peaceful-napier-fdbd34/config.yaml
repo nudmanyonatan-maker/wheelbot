@@ -1,0 +1,185 @@
+broker:
+  name: alpaca
+  paper_trade: false   # Live trading (was paper). Flip back to true only for paper tests.
+  auto_execute: true  # Autonomous mode — bot trades without approval. Discord is notification-only.
+
+risk:
+  max_daily_loss_pct: 0.05    # 5% of portfolio — circuit breaker halts all trading for the day
+
+capital:
+  # CSPs are cash-secured (strike*100), so per-position cap must be sized so
+  # max affordable strike actually covers the wishlist. At $4985 with
+  # reserve_pct=0.10 → usable ≈ $4486; with cap=0.50 → max strike ≈ $22.
+  # That covers SOFI/F/PINS/VALE; CCL/T are dropped from wishlist below.
+  # Previous cap=0.25 yielded max strike ~$11, which produced no candidates
+  # for any wishlist name and was the proximate cause of the no-fills outage.
+  total: 4985            # Live account equity as of 2026-04-23 (Alpaca /v2/account)
+  max_per_position_pct: 0.50  # Was 0.25 — too tight for $5K wishlist
+  reserve_pct: 0.10           # Always keep 10% cash
+  margin_enabled: true
+
+positions:
+  max_open_total: 2     # Was 4 — math can't support 4 concurrent CSPs at $5K
+  max_pmcc: 0           # Not using PMCC on small account
+  max_wheel: 2          # Was 4 — see above
+
+pmcc:
+  enabled: false
+  leaps_delta: 0.80             # Deep ITM LEAPS
+  leaps_min_dte: 180            # 6+ months minimum
+  short_call_delta: 0.25        # OTM short call
+  short_call_dte_min: 10
+  short_call_dte_max: 45
+  profit_target_pct: 0.50       # Close at 50% profit
+  roll_dte_threshold: 7         # Roll when DTE < 7
+  roll_extrinsic_threshold: 0.10  # Roll when extrinsic < $0.10
+  assignment_extrinsic_floor: 0.05  # Close if extrinsic < $0.05 AND ITM
+  dividend_buffer_days: 7       # Watch ex-div within 7 days
+  leaps_min_dte_before_roll: 90 # Roll LEAPS when DTE drops below 90
+  max_loss_alert_pct: 0.30      # Alert if LEAPS drops 30%
+  profit_compound_alert_pct: 0.50  # Alert when premium collected > 50% of LEAPS cost
+
+wheel:
+  enabled: true
+  wishlist:
+    # LIVE-READY for $5K account — affordability gate is strike*100 ≤ ~$2.2K.
+    # CCL ($28) and T ($26) dropped: their viable strikes exceed the per-position
+    # cap, so they produce zero candidates. Add them back when account ≥ $12K.
+    - SOFI    # $16 | Fintech | IV 35-65%, ann.vol 60% | liquid
+    - F       # $12 | Auto   | IV 30-50%, ann.vol 33% | defensive
+    - PINS    # $18 | Social | IV 40-60%, ann.vol 54%
+    - VALE    # $15 | Mining | IV 35-55%, ann.vol 32% | dividend
+  target_delta: 0.20          # CSP sell delta
+  cc_delta: 0.30              # Covered call delta
+  min_ivr: 30                 # Minimum IV Rank
+  target_dte_min: 21          # Accelerated (was 30) — more turnover, faster sample size
+  target_dte_max: 40          # Slightly wider window to increase candidate count
+  profit_target_pct: 0.30     # Accelerated (was 0.50) — close at 30% of max profit for faster cycles
+  stop_loss_multiplier: 2.0   # Alert if loss = 2x credit
+  roll_dte_threshold: 7       # Roll when DTE < 7
+  earnings_buffer_days: 14    # Skip stocks with earnings within 14 days
+  min_open_interest: 150      # Was 500; keep liquidity floor while allowing more contracts
+  max_bid_ask_spread: 0.20    # Was 0.10; conservative relaxation to improve fill opportunities
+
+ai:
+  enabled: true
+  provider: openai
+  model: gpt-4o
+  max_candidates: 5  # AI ranks top 5 from filtered list
+
+scheduling:
+  premarket_check_time: "08:00"     # ET — overnight move review
+  assignment_check_time: "09:31"    # ET — daily reconciliation
+  scan_time: "09:35"                # ET — morning scan
+  optimal_entry_start: "10:00"      # ET — best entry window start
+  optimal_entry_end: "11:00"        # ET — best entry window end
+  roll_window_start: "10:00"        # ET — best roll window start
+  roll_window_end: "14:00"          # ET — best roll window end
+  no_entry_after: "15:45"           # ET — no new positions after this
+  auto_cancel_time: "15:50"         # ET — cancel unfilled orders
+  eod_snapshot_time: "17:00"        # ET — daily snapshot + perf update
+  monitor_interval_min: 5           # Position monitoring frequency (was 15)
+  order_check_interval_min: 5       # Pending order check frequency
+  heartbeat_interval_min: 10        # API health check frequency
+  stale_order_hours: 2              # Alert if order unfilled after this
+
+universe:
+  base_tickers:
+    - F       # Ford ~$11
+    - INTC    # Intel ~$22
+    - T       # AT&T ~$17
+    - CSCO    # Cisco ~$48
+    - SOFI    # SoFi ~$12
+    - PLTR    # Palantir ~$22
+    - NIO     # NIO ~$5
+    - BAC     # Bank of America ~$38
+    - PFE     # Pfizer ~$25
+    - KO      # Coca-Cola ~$47
+    - WFC     # Wells Fargo ~$42
+    - SNAP    # Snap ~$10
+    - HOOD    # Robinhood ~$45
+    - RIVN    # Rivian ~$13
+    - LCID    # Lucid ~$3
+    - CCL     # Carnival ~$18
+    - AAL     # American Airlines ~$10
+    - DAL     # Delta ~$45
+    - UBER    # Uber ~$38
+    - MARA    # Marathon Digital ~$15
+  pmcc_etfs:
+    - IWM     # Russell 2000 ~$210 (LEAPS ~$2,500-3,500)
+    - QQQ     # Nasdaq-100 ~$480 (stretch at $5K)
+
+# PRIMARY STRATEGY — Volatility Risk Premium via Put Credit Spreads
+# Backed by 32+ years of CBOE PUT Index data (Sharpe 0.65)
+vrp_spreads:
+  enabled: false
+  # Scan universe — the top ~50 most liquid options tickers.
+  # Bot scores every one and picks the best spread each day.
+  # You can add/remove tickers anytime.
+  underlyings:
+    # ETFs (always liquid, tight spreads)
+    - SPY     # S&P 500
+    - QQQ     # Nasdaq 100
+    - IWM     # Russell 2000
+    - DIA     # Dow 30
+    - XLE     # Energy sector
+    - XLF     # Financials
+    - XLK     # Tech sector
+    - XLV     # Healthcare
+    - XLI     # Industrials
+    - GDX     # Gold miners
+    - EEM     # Emerging markets
+    - HYG     # High-yield bonds
+    - TLT     # Long-term treasuries
+    # Mega-cap tech (highest options volume)
+    - AAPL
+    - MSFT
+    - NVDA
+    - AMZN
+    - META
+    - GOOGL
+    - TSLA
+    # High IV names (rich premiums)
+    - AMD
+    - NFLX
+    - CRM
+    - COIN
+    - SQ
+    - SHOP
+    - ROKU
+    - SNAP
+    - PLTR
+    - SOFI
+    - MARA
+    - RIOT
+    - UBER
+    - ABNB
+    - DKNG
+    - HOOD
+    # Blue chips with liquid options
+    - JPM
+    - BAC
+    - GS
+    - V
+    - MA
+    - DIS
+    - NKE
+    - BA
+    - CAT
+    - HD
+  spread_width: 5.0              # Hard max spread width override
+  spread_width_pct: 0.01          # Dynamic width = ~1% of stock price (clamped to spread_width)
+  target_delta: 0.16             # ~1 standard deviation OTM (~84% win rate)
+  delta_min: 0.10                # Don't go too far OTM (premium too small)
+  delta_max: 0.22                # Don't go too close (too much risk)
+  target_dte_min: 30             # Minimum days to expiration
+  target_dte_max: 45             # Maximum days to expiration
+  profit_target_pct: 0.50        # Close at 50% of max credit (take profit early)
+  stop_loss_multiplier: 2.0      # Close if loss = 2x credit received
+  max_simultaneous: 2            # Max 2 spreads open at once
+  min_credit: 0.50               # Don't bother if credit < $0.50 per spread
+  min_open_interest: 500         # Liquidity floor
+  open_frequency_days: 7         # Wait at least 7 days between new entries
+  close_dte_threshold: 5         # Close any spread with < 5 DTE (gamma risk)
+  vix_min: 15.0                  # Skip trades when VIX < 15 (premiums too thin)
+  vix_max: 40.0                  # Skip trades when VIX > 40 (market panic, too risky)

@@ -1,0 +1,25 @@
+{
+  "name": "iso-desk",
+  "private": true,
+  "description": "ISO Desk: a CRM for an MCA funder's ISO manager. Private desks on Cloudflare Pages + D1, a public demo, and a cron worker for phone alerts.",
+  "scripts": {
+    "dev": "wrangler pages dev",
+    "deploy": "wrangler pages deploy public --project-name iso-desk-josh --branch main",
+    "deploy:preview": "wrangler pages deploy public --project-name iso-desk-josh --branch book-roles",
+    "deploy:alerts": "cd alerts-worker && wrangler deploy",
+    "db:migrate": "wrangler d1 migrations apply iso-desk --remote",
+    "db:migrate:preview": "wrangler d1 migrations apply iso-desk-preview --remote --env preview",
+    "db:migrate:local": "wrangler d1 migrations apply iso-desk --local",
+    "invite": "node scripts/invite.mjs",
+    "feedback": "sh scripts/feedback.sh",
+    "test": "node scripts/smoke.js demo && node scripts/smoke.js live && node scripts/smoke.js team && node scripts/smoke.js rep && node scripts/test-import.js && node scripts/test-webpush.mjs && node alerts-worker/test-run.mjs && node scripts/test-book.mjs",
+    "test:api": "node scripts/test-api.mjs",
+    "test:book": "node scripts/test-book.mjs",
+    "video": "node scripts/record.js"
+  },
+  "devDependencies": {
+    "http_ece": "^1.2.1",
+    "playwright-core": "^1.56.1",
+    "wrangler": "^4.151.0"
+  }
+}

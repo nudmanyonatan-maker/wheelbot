@@ -1,0 +1,69 @@
+{
+ "output_name": "iso-desk-promo",
+ "brand": {
+  "name": "ISO Desk",
+  "accent": "#5b7cff",
+  "accent2": "#2a43c4"
+ },
+ "voice": {
+  "speaker": "Aiden",
+  "say": {},
+  "instruct": "Friendly, confident American guy talking to a busy sales manager at a lending company. Natural, conversational, a little brisk. Not salesy, not robotic."
+ },
+ "capture": {
+  "baseUrl": "http://localhost:8798",
+  "loginUrl": "/api/dev-login?email=alex@example.com",
+  "startPath": "/"
+ },
+ "items": {
+  "i1": {
+   "big": "You run the ISO desk<br>at a funder."
+  },
+  "i2a": {
+   "big": "Dozens of broker shops,"
+  },
+  "i2b": {
+   "big": "all sending <span style=\"color:{{ACCENT}}\">deals.</span>"
+  },
+  "i3a": {
+   "big": "And every one of them"
+  },
+  "i3b": {
+   "big": "needs a <span style=\"color:{{ACCENT}}\">follow-up.</span>"
+  },
+  "chip_note": {
+   "chip": "Sticky notes",
+   "icon": "chat"
+  },
+  "chip_phone": {
+   "chip": "Missed calls",
+   "icon": "phone"
+  },
+  "chip_mail": {
+   "chip": "A CRM nobody likes",
+   "icon": "mail"
+  },
+  "tag_i5": {
+   "text": "Your shops, deals and follow-ups.<br><b style=\"color:#fff\">On one simple screen.</b>",
+   "size": 44,
+   "weight": 500,
+   "color": "#cbd5e1"
+  },
+  "tag_o1a": {
+   "text": "Built for ISO managers.",
+   "size": 58
+  },
+  "tag_o1b": {
+   "text": "Simple enough to use <span style=\"color:{{ACCENT}}\">every day.</span>",
+   "size": 58,
+   "color": "#fff"
+  }
+ },
+ "contact": {
+  "heading": "Talk to Yonatan",
+  "phone": "(224) 619-6876",
+  "email": "nudman.yonatan@gmail.com",
+  "note": "Pricing depends on what your team needs.<br><span style=\"color:#fff;font-weight:600\">Reach out and we'll show you around.</span>"
+ },
+ "music": true
+}

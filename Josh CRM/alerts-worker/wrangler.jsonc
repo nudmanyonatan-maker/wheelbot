@@ -1,0 +1,16 @@
+{
+  "name": "iso-desk-alerts",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-01",
+  "vars": { "VAPID_PUBLIC_KEY": "BB9v5Mjkgc0TZbiz0A3K2cTHCsCZCXemd4-r7SgllM5dF9Bkspaeru3eDwJn7Jwc-6qGM7vf8hKhBE8AqFXh8q4", "VAPID_SUBJECT": "https://iso-desk-josh.pages.dev" },
+  "triggers": {
+    "crons": ["* * * * *"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "iso-desk",
+      "database_id": "99078f93-8644-44a2-b2dc-7b89724068c1"
+    }
+  ]
+}
